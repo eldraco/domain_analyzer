@@ -66,7 +66,7 @@ We developed a separate python web crawler called "crawler.py". Its main feature
 
 - Find 10 random domains in the .gov domain and analyze them fully (including web crawling). If it find some Zone Transfer, retrive more domains using them!!
 
-    domain_analyzer_v0.5.py -d .gov -k 10 -b
+    > domain_analyzer_v0.5.py -d .gov -k 10 -b
 
 - (Very Quick and dirty)  Find everything related with .edu.cn domain, store everything in directories. Do not search for active host, do not nmap scan them, do not reverse-dns the netblock, do not search for emails. 
 
