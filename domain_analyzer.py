@@ -2342,8 +2342,6 @@ def find_robtex_domains():
 					#text2=text.split('<span id="sharedns">')[1].split('</div>')[0].split(')')[1]
 					text2=text.split('id="dns1"')[1].split('<div class="div4">')[0].split(')')[1]
 					temp_domains = re.findall('(href="\w[\w\.\-]+\.html")',text2)
-					if debug:
-						print temp_domains
 
 					logging.info('\tWe found {0} more domains:'.format(len(temp_domains)))
 					if output_directory!=False:
