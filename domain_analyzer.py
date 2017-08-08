@@ -168,7 +168,7 @@ domain_data['DomainInfo']=[]
 check_common_hosts_names=True
 
 # Default is to scan only TCP ports
-nmap_scantype="-O --reason --webxml --traceroute -sS -sV -sC -PN -n -v -F"
+nmap_scantype="-O --reason --webxml --traceroute -sS -sV -sC -Pn -n -v -F"
 
 # Default is to transfer the zone
 zone_transfer=True
