@@ -4,7 +4,7 @@
 Domain analyzer is a security analysis tool which automatically discovers and reports information about the given domain. Its main purpose is to analyze domains in an unattended way.
 
 ## How
-Domain analyzer takes a domain name and finds information about it, like its DNS servers, mail servers, IP addresses, mails, SPF information, etc. Also, it can scan the ports of every IP found using nmap and perform several other security checks.
+Domain analyzer takes a domain name and finds information about it, such as DNS servers, mail servers, IP addresses, mails on Ggole, SPF information, etc. After all the information is stored and organized it scans the ports of every IP found using nmap and perform several other security checks. After the ports are found, it uses the tool crawler.py from @vero.valeros, to spider the complete web page of all the web ports found. This tool has the option to download files and find open folders.
 
 Current version is 0.8 and the main features are:
 
@@ -56,7 +56,7 @@ We developed a separate python web crawler called "crawler.py". Its main feature
 
 ## This extended edition has more featuers!
 - World-domination: You can automatically analyze the whole world! (if you have time)
-- Robin-hood: Although it is still in develpment, it will let you send automatically an email to the mails found during scan with the analysis information.
+- __Robin-hood__: Although it is still in develpment, it will let you send automatically an email to the mails found during scan with the analysis information.
 - Robex DNS: With this incredible function, every time you found a DNS servers with Zone Transfer, it will retrieve from the robtex site other domains using that DNS server! 
              It will automatically analyze them too! This can be a never ending test! Every vulnerable DNS server can be used by hundreds of domains, which in turn can be
              using other vulnerable DNS servers. BEWARE! Domains retrieved can be unrelated to the first one.
@@ -66,23 +66,23 @@ We developed a separate python web crawler called "crawler.py". Its main feature
 
 - Find 10 random domains in the .gov domain and analyze them fully (including web crawling). If it find some Zone Transfer, retrive more domains using them!!
 
-    > domain_analyzer_v0.5.py -d .gov -k 10 -b
+    > domain_analyzer.py -d .gov -k 10 -b
 
 - (Very Quick and dirty)  Find everything related with .edu.cn domain, store everything in directories. Do not search for active host, do not nmap scan them, do not reverse-dns the netblock, do not search for emails. 
 
-    > domain_analyzer_v0.5.py -d edu.cn -b -o -g -a -n
+    > domain_analyzer.py -d edu.cn -b -o -g -a -n
 
 - Analyze the 386.edu.ru domain fully
 
-    > domain_analyzer_v0.5.py -d 386.edu.ru -b -o 
+    > domain_analyzer.py -d 386.edu.ru -b -o 
 
 - (Pen tester mode). Analyze a domain fully. Do not find other domains. Print everything in a pdf file. Store everything on disk. When finished open Zenmap and show me the topologyof every host found at the same time!
 
-    > domain_analyzer_v0.5.py -d amigos.net -o -e
+    > domain_analyzer.py -d amigos.net -o -e
 
 - (Quick with web crawl only). Ignore everything with 'google' on it.
 
-    > domain_analyzer_v0.5.py -d mil.cn -b -o -g -a -n -v google -x '-O --reason --webxml --traceroute -sS -sV -sC -PN -n -v -p 80,4443'
+    > domain_analyzer.py -d mil.cn -b -o -g -a -n -v google -x '-O --reason --webxml --traceroute -sS -sV -sC -PN -n -v -p 80,4443'
 
 - (Everything) Crawl up to 100 URLs of this site including subdomains. Store output into a file and download every INTERESTING file found to disk.
 
