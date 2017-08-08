@@ -64,7 +64,7 @@ Current version is 0.8 and the main features are:
 
 ## Examples
 
-- Find 10 random domains in the .gov domain and analyze them fully (including web crawling). If it find some Zone Transfer, retrive more domains using them!!
+- Find 10 random domains in the .gov domain and analyze them fully (including web crawling). If it find some Zone Transfer, retrive more domains using them from Robtex!!
 
     > domain_analyzer.py -d .gov -k 10 -b
 
@@ -100,7 +100,10 @@ Most of these features can be deactivated.
 
 ## Screenshots
 
-![Basic Operation](images/screenshot1.png "Search random domains in a TLD, add the zone Transfer hosts.")
+1. Example domain_analyzer.py -d .gov -k 10 -b
+![Basic Operation](images/screenshot1.png | width=100 "Search random domains in a TLD, add the zone Transfer hosts.")
+
+
 
 
 
