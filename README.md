@@ -103,8 +103,13 @@ Most of these features can be deactivated.
 1. Example domain_analyzer.py -d .gov -k 10 -b
 
 ![Basic Operation](images/screenshot1.png | width=100 "Search random domains in a TLD, add the zone Transfer hosts.")
+![Basic Operation](images/screenshot1.png | width=100)
 
 asdf
+![Basic Operation](images/screenshot1.png | =250x250 "Search random domains in a TLD, add the zone Transfer hosts.")
+![Basic Operation](images/screenshot1.png | =250x250)
+
+asdf2
 ![Basic Operation](images/screenshot1.png "Search random domains in a TLD, add the zone Transfer hosts.")
 
 
