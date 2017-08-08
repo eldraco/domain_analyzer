@@ -34,22 +34,24 @@ Current version is 0.8 and the main features are:
 
 
 ## Bonus features
+
 We developed a separate python web crawler called "crawler.py". Its main features are:
-    - Crawl http and https web sites.
-    - Crawl http and https web sites not using common ports.
-    - Uses regular expressions to find 'href' and 'src' html tag. Also content links.
-    - Identifies relative links.
-    - Identifies domain related emails.
-    - Identifies directory indexing.
-    - Detects references to URLs like 'file:', 'feed=', 'mailto:', 'javascript:' and others.
-    - Uses CTRL-C to stop current crawler stages and continue working.
-    - Identifies file extensions (zip, swf, sql, rar, etc.)
-    - Download files to a directory:
-      - Download every important file (images, documents, compressed files).
-      - Or download specified files types.
-      - Or download a predefined set of files (like 'document' files: .doc, .xls, .pdf, .odt, .gnumeric, etc.).
-    - Maximum amount of links to crawl. A default value of 5000 URLs is set.
-    - Follows redirections using HTML and JavaScript Location tag and HTTP response codes.
+
+- Crawl http and https web sites.
+- Crawl http and https web sites not using common ports.
+- Uses regular expressions to find 'href' and 'src' html tag. Also content links.
+- Identifies relative links.
+- Identifies domain related emails.
+- Identifies directory indexing.
+- Detects references to URLs like 'file:', 'feed=', 'mailto:', 'javascript:' and others.
+- Uses CTRL-C to stop current crawler stages and continue working.
+- Identifies file extensions (zip, swf, sql, rar, etc.)
+- Download files to a directory:
+  - Download every important file (images, documents, compressed files).
+  - Or download specified files types.
+  - Or download a predefined set of files (like 'document' files: .doc, .xls, .pdf, .odt, .gnumeric, etc.).
+- Maximum amount of links to crawl. A default value of 5000 URLs is set.
+- Follows redirections using HTML and JavaScript Location tag and HTTP response codes.
 
 
 ## This extended edition has more featuers!
