@@ -29,7 +29,7 @@ Current version is 0.8 and the main features are:
 - It crawls every web server page using our crawler.py tool. See the description below.
 - It filters out hostnames based on their name.
 - It pseudo-randomly searches N domains in google and automatically analyze them!
-- Uses CTRL-C to stop current analysis stage and continue working.
+- Uses CTRL-C to stop current __analysis__ stage and continue working.
 - It can read an external file with domain names and try to find them on the domain.
 
 
@@ -70,31 +70,31 @@ We developed a separate python web crawler called "crawler.py". Its main feature
 
 - (Very Quick and dirty)  Find everything related with .edu.cn domain, store everything in directories. Do not search for active host, do not nmap scan them, do not reverse-dns the netblock, do not search for emails. 
 
-    domain_analyzer_v0.5.py -d edu.cn -b -o -g -a -n
+    > domain_analyzer_v0.5.py -d edu.cn -b -o -g -a -n
 
 - Analyze the 386.edu.ru domain fully
 
-    domain_analyzer_v0.5.py -d 386.edu.ru -b -o 
+    > domain_analyzer_v0.5.py -d 386.edu.ru -b -o 
 
 - (Pen tester mode). Analyze a domain fully. Do not find other domains. Print everything in a pdf file. Store everything on disk. When finished open Zenmap and show me the topologyof every host found at the same time!
 
-    domain_analyzer_v0.5.py -d amigos.net -o -e
+    > domain_analyzer_v0.5.py -d amigos.net -o -e
 
 - (Quick with web crawl only). Ignore everything with 'google' on it.
 
-    domain_analyzer_v0.5.py -d mil.cn -b -o -g -a -n -v google -x '-O --reason --webxml --traceroute -sS -sV -sC -PN -n -v -p 80,4443'
+    > domain_analyzer_v0.5.py -d mil.cn -b -o -g -a -n -v google -x '-O --reason --webxml --traceroute -sS -sV -sC -PN -n -v -p 80,4443'
 
 - (Everything) Crawl up to 100 URLs of this site including subdomains. Store output into a file and download every INTERESTING file found to disk.
 
-    crawler.py -u www.386.edu.ru -w -s -m 100 -f
+    > crawler.py -u www.386.edu.ru -w -s -m 100 -f
 
 - (Quick and dirty) Crawl the site very quick. Do not download files. Store the output to a file.
 
-    crawler.py -u www.386.edu.ru -w -m 20 
+    > crawler.py -u www.386.edu.ru -w -m 20 
 
 - (If you want to analyze metadata later with lafoca). Verbose prints which extensions are being donwloaded. Download only the set of archives corrensponding to Docuements (.doc, .docx, .ppt, .xls, .odt. etc.)
 
-    crawler.py -u ieeeexplore.ieee.org/otherfiles/ -d -v 
+    > crawler.py -u ieeeexplore.ieee.org/otherfiles/ -d -v 
 
 Most of these features can be deactivated.
 
