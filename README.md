@@ -23,7 +23,7 @@ Current version is 0.8 and the main features are:
 - It checks for Zone Transfer on every DNS server.
 - It finds the reverse names of the /24 network range of every IP address.
 - It finds active host using nmap complete set of techniques.
-- It scan ports using nmap.
+- It scan ports using nmap (remember that for the SYN scan you need to need root).
 - It searches for host and port information using nmap.
 - It automatically detects web servers used.
 - It crawls every web server page using our crawler.py tool. See the description below.
@@ -35,7 +35,7 @@ Current version is 0.8 and the main features are:
 
 ## Bonus features
 
-We developed a separate python web crawler called "crawler.py". Its main features are:
+@vero.valeros developed a separate python web crawler called "crawler.py". Its main features are:
 
 - Crawl http and https web sites.
 - Crawl http and https web sites not using common ports.
@@ -97,6 +97,11 @@ We developed a separate python web crawler called "crawler.py". Its main feature
     > crawler.py -u ieeeexplore.ieee.org/otherfiles/ -d -v 
 
 Most of these features can be deactivated.
+
+## Screenshots
+
+![Basic Operation](images/screenshot1.png "Search random domains in a TLD, add the zone Transfer hosts.")
+
 
 
 ## Changelog
