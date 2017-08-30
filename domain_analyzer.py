@@ -1615,9 +1615,9 @@ def check_active_host():
 	hostup={}
 
 
-	print '\n\tChecking {0} active hosts using nmap... (nmap -sP -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sP)'.format(len(domain_data['IpsInfo']))
+	print '\n\tChecking {0} active hosts using nmap... (nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sn)'.format(len(domain_data['IpsInfo']))
 	if output_file!="":
-		output_file_handler.writelines('\n\tChecking {0} active hosts using nmap... (nmap -sP -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sP)\n'.format(len(domain_data['IpsInfo'])))
+		output_file_handler.writelines('\n\tChecking {0} active hosts using nmap... (nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sn)\n'.format(len(domain_data['IpsInfo'])))
 
 	try:
 		# For each ip, nmap it
@@ -1640,14 +1640,14 @@ def check_active_host():
 				# If no output directory was selected, do not store nmap output
 				if output_directory==False or not_store_nmap == 1:
 					#nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip
-					nmap_command_temp='nmap -sP -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip
+					nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip
 				else:
 					try:
 						os.mkdir(output_directory+'/nmap')
 					except OSError:
 						pass
-					#nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sP'
-					nmap_command_temp='nmap -sP -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sP'
+					#nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sn'
+					nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sn'
 				nmap_command=shlex.split(nmap_command_temp)
 				nmap_result=Popen(nmap_command, stdout=PIPE).communicate()[0]
 				
