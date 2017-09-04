@@ -3,6 +3,9 @@
 ## What
 Domain analyzer is a security analysis tool which automatically discovers and reports information about the given domain. Its main purpose is to analyze domains in an unattended way.
 
+## Example default options
+![Default Options](https://github.com/eldraco/domain_analyzer/raw/master/videos/domain_analyzer-example-default_com.ar.gif)
+
 ## How
 Domain analyzer takes a domain name and finds information about it, such as DNS servers, mail servers, IP addresses, mails on Google, SPF information, etc. After all the information is stored and organized it scans the ports of every IP found using nmap and perform several other security checks. After the ports are found, it uses the tool crawler.py from @verovaleros, to spider the complete web page of all the web ports found. This tool has the option to download files and find open folders.
 
