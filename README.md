@@ -122,6 +122,8 @@ If you want all the features (web crawler, pdf and colors), which is nice, also 
 - crawler.py
 - pyText2pdf.py
 
+If you have any issues with the GeoIP database, please download it from its original source [here](http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz). And install it in where your system needs it, usually at /opt/local/share/GeoIP/GeoIP.dat
+
 
 # Requests
 If you have any question, please send us an email! They are in the python files.
