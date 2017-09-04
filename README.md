@@ -104,7 +104,8 @@ Most of these features can be deactivated.
 ![Basic Operation](images/screenshot1.png "Search random domains in a TLD, add the zone Transfer hosts.")
 
 
-
+# History
+Domain analyzer was born on Feb 4th, 2011. You can check the original repository in source forge [here](https://sourceforge.net/projects/domainanalyzer/)
 
 
 ## Changelog
@@ -122,7 +123,7 @@ If you want all the features (web crawler, pdf and colors), which is nice, also 
 - pyText2pdf.py
 
 
-
+# Requests
 If you have any question, please send us an email! They are in the python files.
 
 
