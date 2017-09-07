@@ -664,7 +664,7 @@ def dns_request(domain):
 		#
 		try:
 			wildcard_detect = dns.resolver.query('asdf80a98vrnwe9ufrcsajd90awe8ridsjkd.'+domain, 'A')
-			logging.warning('\t\tWARNING!! This domain has wildcards activated for hostnames resultion. We are checking "www" anyway, but perhaps it doesn\'t exists!')
+			logging.warning('\t\tWARNING!! This domain has wildcards activated for hostnames resolution. We are checking "www" anyway, but perhaps it doesn\'t exists!')
 			if output_file!="":
 				output_file_handler.writelines('\t\tWARNING!! This domain has wildcards activated for hostnames resolution. We are checking "www" anyway, but perhaps it doesn\'t exists!\n')
 			
