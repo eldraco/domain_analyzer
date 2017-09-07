@@ -1810,26 +1810,6 @@ def host_info(domain):
                     except KeyboardInterrupt:
                         sys.exit(1)
         # End for    
-        # Move the xml files to its own directory, so it is easier to see them with zenmap
-        if output_directory!=False and not_store_nmap != 1:
-            try:
-                os.mkdir(output_directory + '/nmap/xml')
-            except OSError:
-                print('There was an error creating the xml folder for storing the files for zenmap. Trying to continue.')
-                pass
-            # Move everything to xml directory
-            try:
-                os.system('mv ' + output_directory +'/nmap/*.xml ' + output_directory + '/nmap/xml')
-            except Exception as inst:
-                print('There was an error moving the xml files to the xml folder for zenmap. Trying to continue.')
-                print type(inst)     # the exception instance
-                print inst.args      # arguments stored in .args
-                print inst           # __str__ allows args to printed directly
-                x, y = inst          # __getitem__ allows args to be unpacked directly
-                print 'x =', x
-                print 'y =', y
-        elif zenmap==1:
-            logging.debug('\tTo use zenmap you must specify an output directory and store nmap output files.')
     except Exception as inst:
         print type(inst)     # the exception instance
         print inst.args      # arguments stored in .args
@@ -2136,6 +2116,16 @@ def analyze_domain(domain):
                 printout(domain,'',1)
                 # If zenmap was selected, open zenmap with the topolog
                 if zenmap == 1:
+                    # Move the xml files to its own directory, so it is easier to see them with zenmap
+                    if output_directory != False and not_store_nmap != 1:
+                        try:
+                            os.mkdir(output_directory + '/nmap/xml')
+                            # Move everything to xml directory
+                            os.system('mv ' + output_directory + '/nmap/*.xml ' + output_directory + '/nmap/xml')
+                        except OSError:
+                            print('There was an error creating the xml folder for storing the files for zenmap. Trying to continue.')
+                    elif output_directory == False:
+                        logging.debug('\tTo use zenmap you must specify an output directory and store nmap output files.')
                     # Do it more generic so other systems can use zenmap 
                     command_line = zenmap_command + ' ' + output_directory + '/nmap/xml'
                     args = shlex.split(command_line)
