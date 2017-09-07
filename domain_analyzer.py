@@ -2062,7 +2062,7 @@ def analyze_domain(domain):
                 if debug:
                     logging.debug('\t\t> Checking if {0} is a domain...'.format(domain),)
                 host_name_ns = dns.resolver.query(domain, 'NS')
-            except NoAnswer:
+            except:
                 logging.error('\tThe given name doesn\'t seem to be a domain since there are no NS servers assigned to it. Stopping.\n')
                 return -1 
             # Now we are sure its a domain!
