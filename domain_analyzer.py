@@ -2064,6 +2064,7 @@ def analyze_domain(domain):
                 host_name_ns = dns.resolver.query(domain, 'NS')
             except:
                 logging.error('\tThe given name doesn\'t seem to be a domain since there are no NS servers assigned to it. Stopping.\n')
+                logging.error('\tThe dnspython library in macos can not find domains such as com. It is a bug in the library. Linux can.\n')
                 return -1 
             # Now we are sure its a domain!
             print
@@ -2243,7 +2244,7 @@ def find_robtex_domains():
 
                     # Extract the exact domain name from the href
                     for temp_domain in temp_domains:
-                        unrelated_domain=temp_domain.split('href="')[1].split('.html"')[0]
+                        unrelated_domain=temp_domain.split('href="')[1].split('.html"')[0].replace('\'','')
 
                         # Append it to main dictionary of domains to analyze
                         try:
@@ -2264,9 +2265,6 @@ def find_robtex_domains():
                             print type(inst)     # the exception instance
                             print inst.args      # arguments stored in .args
                             print inst           # __str__ allows args to printed directly
-                            x, y = inst          # __getitem__ allows args to be unpacked directly
-                            print 'x =', x
-                            print 'y =', y
 
                 except:
                     logging.info('\t\tNo more domains found in robtex')
