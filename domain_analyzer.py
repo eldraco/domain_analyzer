@@ -86,10 +86,10 @@
 # - Create a tar.gz with everything!
 # - Add the last router in the traceroute to the analysis.
 # - Compute and print statistics about the problems found sorted by country/domain
-# - Be tor-friendly. Detect tor is being used and Use tor-resolv or something.
+# - Be tor-friendly. Detect tor is being used and Use tor-resolve or something.
 # - Detect and count DNS missconfigurations
 # - Zenmap does not work fine with multiple subdomains, it keeps opening the main domain only
-# - From inside a network with a web proxy, sometimes zone transfer do not work and every domain seems to have wilcards!. To identify this
+# - From inside a network with a web proxy, sometimes zone transfer does not work and every domain seems to have wilcards!. To identify this
 #    perhaps is useful to try to make a ZT froma known public domain. If it does not occur, then the internal network is filtering!
 # - Have a --robin-hood option, which sends the pdf report to every email found in the domain, using domain MX host.
 # - Check domains like with strange characters, like chineese
@@ -101,6 +101,7 @@
 # -- Web --
 # - Recognize login web pages
 # - Run a very light nikto?
+# - Make zenmap work in macos
 #
 # BUGS
 # - Nmap ports are printed twice in the printout, and ports are not printed at all during the scan. BOTH IN THE OUTPUT FILE.
@@ -110,6 +111,7 @@
 # standard imports
 from subprocess import Popen
 from subprocess import PIPE
+from subprocess import call
 from ansistrm import *
 import socket
 import os, sys
@@ -1485,7 +1487,7 @@ def find_and_analyze_random_domains(domain, amount):
 
 def check_domain_emails(domain):
     """
-    This function implements the goog-mail.py program that was once included in backtrack 2. We ignore who the author was but we thanks him/her and 
+    This function implements the goog-mail.py program that was once included in backtrack 2. We don't know who the author was but we thanks him/her and 
     we give him/her the credit for it
     """
     global debug
@@ -1493,94 +1495,77 @@ def check_domain_emails(domain):
     global output_file
     global output_file_handler
 
-    try:
-
-        import string
-        import httplib
-        import urllib2
-        import re
-        
-        print '\n\tSearching for {0} emails in google'.format(domain)
-        if output_file!="":
-            output_file_handler.writelines('\n\tSearching for {0} emails in google\n'.format(domain))
-
-
-        #
-        def StripTags(text):
-            finished = 0
-            while not finished:
+    def StripTags(text):
+        finished = 0
+        while not finished:
             finished = 1
             start = text.find("<")
             if start >= 0:
                 stop = text[start:].find(">")
                 if stop >= 0:
-                text = text[:start] + text[start+stop+1:]
-                finished = 0
-            return text
-
+                    text = text[:start] + text[start+stop+1:]
+                    finished = 0
+        return text
+    try:
+        import string
+        import httplib
+        import urllib2
+        import re
+        print '\n\tSearching for {0} emails in Google'.format(domain)
+        if output_file!="":
+            output_file_handler.writelines('\n\tSearching for {0} emails in Google\n'.format(domain))
         d={}
         page_counter = 0
         try:
             while page_counter < 50 :
-            results = 'http://groups.google.com/groups?q='+str(domain)+'&hl=en&lr=&ie=UTF-8&start=' + repr(page_counter) + '&sa=N'
-            request = urllib2.Request(results)
-            request.add_header('User-Agent','Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)')
-            opener = urllib2.build_opener()
-            text = opener.open(request).read()
-            emails = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
-            for email in emails:
-                d[email]=1
-                uniq_emails=d.keys()
-            page_counter = page_counter +10
+                results = 'http://groups.google.com/groups?q='+str(domain)+'&hl=en&lr=&ie=UTF-8&start=' + repr(page_counter) + '&sa=N'
+                request = urllib2.Request(results)
+                request.add_header('User-Agent','Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)')
+                opener = urllib2.build_opener()
+                text = opener.open(request).read()
+                emails = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
+                for email in emails:
+                    d[email]=1
+                    uniq_emails=d.keys()
+                page_counter = page_counter + 10
         except IOError:
             logging.debug("\t> Can't connect to Google Groups!"+"")
-
         page_counter_web=0
         try:
             while page_counter_web < 50 :
-            results_web = 'http://www.google.com/search?q=%40'+str(domain)+'&hl=en&lr=&ie=UTF-8&start='+ repr(page_counter_web) + '&sa=N'
-            request_web = urllib2.Request(results_web)
-            request_web.add_header('User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
-            opener_web = urllib2.build_opener()
-            text = opener_web.open(request_web).read()
-            emails_web = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
-            for email_web in emails_web:
-                d[email_web]=1
-                uniq_emails_web=d.keys()
-            page_counter_web = page_counter_web +10
-
+                results_web = 'http://www.google.com/search?q=%40'+str(domain)+'&hl=en&lr=&ie=UTF-8&start='+ repr(page_counter_web) + '&sa=N'
+                request_web = urllib2.Request(results_web)
+                request_web.add_header('User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
+                opener_web = urllib2.build_opener()
+                text = opener_web.open(request_web).read()
+                emails_web = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
+                for email_web in emails_web:
+                    d[email_web]=1
+                    uniq_emails_web=d.keys()
+                page_counter_web = page_counter_web + 10
         except IOError:
             logging.debug("\t> Can't connect to Google Web!"+"")
         for uniq_emails_web in d.keys():
-
             # Just adds a warning if the emails is more thatn 20 characters long. Not in the original goog-mail.py
             if len(uniq_emails_web.split('@')[0]) >= 20:
                 uniq_emails_web_temp=uniq_emails_web
                 uniq_emails_web=uniq_emails_web_temp+' - Is this real?'
-
             logging.warning('\t\t'+uniq_emails_web)
             if output_file!="":
                 output_file_handler.writelines('\t\t'+uniq_emails_web)
-
             domain_registry=[]
             email_list={}
-
             # If already exists this IP in the registry
             domain_registry=domain_data['DomainInfo']
-
             # Here we store the email obtained in a dictionary. The index is 'Email'
             email_list['Email']=uniq_emails_web
             domain_registry.append(email_list)
             if debug:
                 logging.debug('\t\t> Emails found so far : {0}'.format(domain_registry))
-
             # We store it in the main dictionary
             a=[]
             a=copy.deepcopy(domain_registry)
             domain_data['DomainInfo']=a
-
-
-
     except Exception as inst:
         print type(inst)     # the exception instance
         print inst.args      # arguments stored in .args
@@ -1594,12 +1579,8 @@ def check_domain_emails(domain):
             print "Keyboard Interruption!. Skiping the mail check step. Press CTRL-C again to exit."
             time.sleep(1)
             return (2)
-
         except KeyboardInterrupt:
             sys.exit(1)
-
-
-
 
 def check_active_host():
     """
@@ -1611,21 +1592,16 @@ def check_active_host():
     global output_file
     global output_file_handler
     global ignore_host_pattern
-
     hostup={}
-
-
     print '\n\tChecking {0} active hosts using nmap... (nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sn)'.format(len(domain_data['IpsInfo']))
     if output_file!="":
         output_file_handler.writelines('\n\tChecking {0} active hosts using nmap... (nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sn)\n'.format(len(domain_data['IpsInfo'])))
-
     try:
         # For each ip, nmap it
         for ip in domain_data['IpsInfo']:
             ignore=False
             ip_registry=domain_data['IpsInfo'][ip]
             reason=""
-
             # If any of the host names has the 'ignored' pattern, do not check it!
             if ignore_host_pattern:
                 for dict in ip_registry:
@@ -1639,47 +1615,36 @@ def check_active_host():
             if not ignore:
                 # If no output directory was selected, do not store nmap output
                 if output_directory==False or not_store_nmap == 1:
-                    #nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip
-                    nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip
+                    nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason ' + ip
                 else:
                     try:
                         os.mkdir(output_directory+'/nmap')
                     except OSError:
                         pass
-                    #nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sn'
-                    nmap_command_temp='nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sn'
+                    nmap_command_temp = 'nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sn'
                 nmap_command=shlex.split(nmap_command_temp)
                 nmap_result=Popen(nmap_command, stdout=PIPE).communicate()[0]
-                
                 if nmap_result.find('Host is up, received')!=-1:
                     reason=nmap_result.split('received ')[1].split(' (')[0]
                     hostup['HostUp']='True ('+reason+')'
                     ip_registry.append(hostup)
-
                     # We store it in the main dictionary
                     a=[]
                     a=copy.deepcopy(ip_registry)
                     domain_data['IpsInfo'][ip]=a
-
                     logging.debug('\t\tHost {0} is up ({1})'.format(ip,reason))
                     if output_file!="":
                         output_file_handler.writelines('\t\tHost {0} is up ({1})\n'.format(ip,reason))
                 else:
                     hostup['HostUp']="False"
-
                     ip_registry.append(hostup)
-
                     # We store it in the main dictionary
                     a=[]
                     a=copy.deepcopy(ip_registry)
                     domain_data['IpsInfo'][ip]=a
-
                     print '\t\tHost {0} is down'.format(ip)
                     if output_file!="":
                         output_file_handler.writelines('\t\tHost {0} is down\n'.format(ip))
-                
-
-
     except Exception as inst:
         print type(inst)     # the exception instance
         print inst.args      # arguments stored in .args
@@ -1693,7 +1658,6 @@ def check_active_host():
             print "Keyboard Interruption!. Skiping the active hosts test step. Press CTRL-C again to exit."
             time.sleep(1)
             return (2)
-
         except KeyboardInterrupt:
             sys.exit(1)
 
@@ -1710,11 +1674,9 @@ def host_info(domain):
     global zenmap
     global output_file
     global output_file_handler
-
     print '\n\tChecking ports on every active host using nmap... (nmap '+nmap_scantype+' <ip> -oA <output_directory>/nmap/<ip>)'
     if output_file!="":
         output_file_handler.writelines('\n\tChecking ports on every active host using nmap... (nmap '+nmap_scantype+'  <ip> -oA <output_directory>/nmap/<ip>)\n')
-
     try:
         # For each ip, nmap it
         for ip in domain_data['IpsInfo']:
@@ -1725,7 +1687,6 @@ def host_info(domain):
             hostos={}
             ip_registry=domain_data['IpsInfo'][ip]
             host_name=""
-
             try:
                 # First read the variables...
                 for dicts in ip_registry:
@@ -1763,35 +1724,28 @@ def host_info(domain):
                             starttoread_port_section=0
                             starttoread_traceroute_section=0
                             for line in nmap_result:
-
                                 # Learning port information
                                 # If we find the PORT word, we can start to analyze ports...
                                 if line.find('PORT') != -1:
                                     starttoread_port_section = 1
                                     continue
-
                                 # While we can learn ports but output did not finish
                                 if starttoread_port_section==1 and 'Read data' not in line and 'Warning' not in line:
                                     if debug:
                                         logging.debug('\t\t\t> Line readed from nmap_result: {0}'.format(line))
-
                                     critical=True
                                     if ('tcp' in line or 'udp' in line) and 'open' in line:
-
                                         # Print information about the port
                                         # Try to find critical ports
                                         for cport in normal_port_list:
                                             if line.find(cport) == 0:
                                                 critical=False
-
                                         if critical:
                                             logging.error('\t\t\t{0}'.format(line))
                                         else:
                                             logging.warning('\t\t\t{0}'.format(line))
-
                                         if output_file!="":
                                             output_file_handler.writelines('\t\t\t{0}\n'.format(line))
-
                                         # Store the port info 
                                         hostports['PortInfo']=line
                                         b={}
@@ -1801,12 +1755,10 @@ def host_info(domain):
                                         a=[]
                                         a=copy.deepcopy(ip_registry)
                                         domain_data['IpsInfo'][ip]=a
-
                                     # Are we yet in the script section?
                                     elif '|' in line:
                                         if debug:
                                             logging.info('\t\t\t> Script Line readed from nmap_result: {0}'.format(line))
-
                                         if critical:
                                             logging.error('\t\t\t\t{0}'.format(line))
                                             if output_file!="":
@@ -1815,7 +1767,6 @@ def host_info(domain):
                                             logging.warning('\t\t\t\t{0}'.format(line))
                                             if output_file!="":
                                                 output_file_handler.writelines('\t\t\t\t{0}\n'.format(line))
-
                                         scriptinfo['ScriptInfo']=line
                                         b={}
                                         b=copy.deepcopy(scriptinfo)    
@@ -1824,8 +1775,6 @@ def host_info(domain):
                                         a=[]
                                         a=copy.deepcopy(ip_registry)
                                         domain_data['IpsInfo'][ip]=a
-
-
                                 # Only to extract the os?
                                 if line.find('Service Info')!=-1:
                                     logging.warning('\t\t\tOS Info: {0}'.format(line))
@@ -1838,22 +1787,17 @@ def host_info(domain):
                                     # We store it in the main dictionary
                                     a=copy.deepcopy(ip_registry)
                                     domain_data['IpsInfo'][ip]=a
-                                    
                                 # traceroute
                                 if 'TRACEROUTE' in line:
                                     starttoread_port_section=0
                                     starttoread_traceroute_section=1
                                     traceline=""
-
                                 if starttoread_traceroute_section==1 and 'Read data' not in line and 'Warning' not in line and line != '':
                                     previoustraceline=traceline
                                     traceline=line
-
                                 if 'Read data' in line or 'unrecognized' in line:
                                     starttoread_port_section=0
                                     starttoread_traceroute_section=0
-
-
                         host_name=dicts.get('HostName')
             except KeyboardInterrupt:
                 try:
@@ -1861,31 +1805,35 @@ def host_info(domain):
                     print "Keyboard Interruption!. Skiping this IP, going to the next.... Press CTRL-C again to move to the next check."
                     time.sleep(1)
                     continue
-
                 except KeyboardInterrupt:
                     try:
                         # CTRL-C pretty handling.
                         print "Keyboard Interruption!. Skiping port scanning section. Press CTRL-C again to exit."
                         time.sleep(1)
                         return(1)
-
                     except KeyboardInterrupt:
                         sys.exit(1)
-
         # End for    
-
         # Move the xml files to its own directory, so it is easier to see them with zenmap
         if output_directory!=False and not_store_nmap != 1:
             try:
                 os.mkdir(output_directory + '/nmap/xml')
             except OSError:
+                print('There was an error creating the xml folder for storing the files for zenmap. Trying to continue.')
                 pass
             # Move everything to xml directory
-            os.system('mv '+output_directory+'/nmap/*.xml '+output_directory+'/nmap/xml')
+            try:
+                os.system('mv '+output_directory+'/nmap/*.xml '+output_directory+'/nmap/xml')
+            except Exception as inst:
+                print('There was an error moving the xml files to the xml folder for zenmap. Trying to continue.')
+                print type(inst)     # the exception instance
+                print inst.args      # arguments stored in .args
+                print inst           # __str__ allows args to printed directly
+                x, y = inst          # __getitem__ allows args to be unpacked directly
+                print 'x =', x
+                print 'y =', y
         elif zenmap==1:
             logging.debug('\tTo use zenmap you must specify an output directory and store nmap output files.')
-
-
     except Exception as inst:
         print type(inst)     # the exception instance
         print inst.args      # arguments stored in .args
@@ -1903,10 +1851,6 @@ def host_info(domain):
         except KeyboardInterrupt:
             sys.exit(1)
 
-
-
-
-
 def tt():
     print "               !         !              \n              ! !       ! !              \n             ! . !     ! . !              \n                ^^^^^^^^^ ^                \n              ^             ^              \n            ^  (0)       (0)  ^           \n           ^        ""         ^           \n          ^   ***************    ^         \n        ^   *                 *   ^        \n       ^   *   /\   /\   /\    *    ^       \n      ^   *                     *    ^    \n     ^   *   /\   /\   /\   /\   *    ^    \n    ^   *                         *    ^    \n    ^  *                           *   ^    \n    ^  *                           *   ^    \n     ^ *                           *  ^     \n      ^*                           * ^     \n       ^ *                        * ^    \n       ^  *                      *  ^    \n         ^  *       ) (         * ^    \n             ^^^^^^^^ ^^^^^^^^^             \n                   Totoro              \n" 
 
@@ -1921,7 +1865,6 @@ def printout(domain,ip,option):
     global create_pdf
     global output_file_handler
     ip_vect=[]
-
     try:
         
         # If option = 1 we print all the data extracted
@@ -2034,30 +1977,24 @@ def printout(domain,ip,option):
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tOpen Folders: {0}\n'.format(dicts.get('DirIndex')))
             print
-            logging.info('--------------End  Summary --------------')
+            logging.info('--------------End Summary --------------')
             logging.info('-----------------------------------------')
             if output_directory!=False:
-                output_file_handler.writelines('\n--------------End  Summary --------------\n')
+                output_file_handler.writelines('\n--------------End Summary --------------\n')
                 output_file_handler.writelines('-----------------------------------------\n')
-
             print '\n'
-            if output_file!="":
+            if output_file != "":
                 output_file_handler.writelines('\n')
-
-            if output_file!="" and create_pdf!=False:
+            if output_file != "" and create_pdf != False:
                 try:
                     print '\tCreating pdf file from {0} text output '.format(output_file)
                     os.system('/usr/bin/pyText2pdf.py ' + output_file)
                 except OSError:
                     logging.warning('Warning! pyText2pdf.py not found. Please download from http://code.activestate.com/recipes/532908-text-to-pdf-converter-rewrite/download/1/')
-
-
-
         # If option != 1 we print all the data extracted until now
         else:
             # For each IP in the main dictionary
             ip_vect=domain_data['IpsInfo'][ip]
-
             # Things that are once per IP
             if countrys:
                 for dicts in ip_vect:
@@ -2067,7 +2004,6 @@ def printout(domain,ip,option):
                 logging.info('\t\tIP: {0} ({1})'.format(ip,country))
                 if output_file!="":
                     output_file_handler.writelines('\t\tIP: {0} ({1})\n'.format(ip,country))
-
             # Things that are multiple times per IP
             hostname=""
             for dicts in ip_vect:
@@ -2093,7 +2029,6 @@ def printout(domain,ip,option):
                     logging.error('\t\t\tSub Domain: {0} <- New Subdomain!'.format(dicts['SubDomain']))
                     if output_file!="":
                         output_file_handler.writelines('\t\t\tSub Domain: {0} <- New Subdomain!\n'.format(dicts['SubDomain']))
-
     except Exception as inst:
         print type(inst)     # the exception instance
         print inst.args      # arguments stored in .args
@@ -2107,7 +2042,6 @@ def printout(domain,ip,option):
             print "Keyboard Interruption!. Skiping printout step. Press CTRL-C again to exit."
             time.sleep(1)
             return (2)
-
         except KeyboardInterrupt:
             sys.exit(1)
 
@@ -2206,7 +2140,8 @@ def analyze_domain(domain):
                 printout(domain,'',1)
                 # If zenmap was selected, open zenmap with the topolog
                 if zenmap == 1:
-                    command_line='zenmap '+output_directory+'/nmap/xml'
+                    # Do it more generic so other systems can use zenmap 
+                    command_line='zenmap ' + output_directory + '/nmap/xml'
                     args = shlex.split(command_line)
                     Popen(args)
                 # Are you sure about this?
@@ -2692,6 +2627,22 @@ def main():
         # Change nmap options
         if '-p' in nmap_scantype:
             nmap_scantype.replace('-F','')
+
+        # Make sure zenmap binary is there
+        if zenmap:
+            if call("type zenmap", shell=True, stdout=PIPE, stderr=PIPE) == 0:
+                # Most linux
+                # zenmap exists
+                zenmap_command = 'zenmap'
+            elif call("type /Applications/Zenmap.app/Contents/Resources/bin/zenmap", shell=True, stdout=PIPE, stderr=PIPE) == 0:
+                # For macos installed with the dmg for zenmap
+                # zenmap exists
+                zenmap_command = '/Applications/Zenmap.app/Contents/Resources/bin/zenmap'
+            else:
+                # No zenmap
+                zenmap = False
+                print('Zenmap disabled because it was not found in the system.')
+        print 'zenmap found in {}'.format(zenmap_command)
 
         #
         # Normal way, NOT World Domination!
