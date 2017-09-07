@@ -1021,9 +1021,6 @@ def check_SPF_record(domain):
                             if debug:
                                 logging.debug('\t\t> Included domain in SPF: {0}'.format(spf_domain))
                             check_SPF_record(spf_domain)
-
-
-
                         # Look for ip version 4 and 6 addresses
                         if 'ip' in part:
                             # Extract new ip4 ips
@@ -1074,10 +1071,10 @@ def check_SPF_record(domain):
                                         ip_registry.append(reverseDNS)
 
                             except:
-                                # No ips in the SPF
-                                logging.error('\t\t\tUnknown error in check_SPF_record function')
+                                # No ips in the SPF or ipv6 addresses
+                                logging.error('\t\t\tThere are no IPv4 addresses in the SPF. Maybe IPv6.')
                                 if output_file!="":
-                                    output_file_handler.writelines('\t\t\tUnknown error in check_SPF_record function\n')
+                                    output_file_handler.writelines('\t\t\tThere are no IPv4 addresses in the SPF. Maybe IPv6.\n')
                                 continue
         except :    
             logging.error('\t\tNo SPF record')
