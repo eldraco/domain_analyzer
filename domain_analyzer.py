@@ -249,6 +249,9 @@ all_robtex=False
 use_common_list = False
 common_list_path = ""
 
+# zenmap command
+zenmap_command = 'zenmap'
+
 # End of global variables
 ###########################
 
@@ -800,12 +803,9 @@ def dns_request(domain):
                             except OSError:
                                 pass
                             nmap_command_temp='nmap -sL -v '+ip_net_block+'/24 -oA '+output_directory+'/nmap/'+ip_net_block+'.sL'
-
-
                         print '\t\tChecking netblock {0}'.format(ip_net_block)
                         if output_file!="":
                             output_file_handler.writelines('\t\tChecking netblock {0}\n'.format(ip_net_block))
-
                         nmap_command=shlex.split(nmap_command_temp)
                         nmap_result_raw=Popen(nmap_command, stdout=PIPE).communicate()[0]
                         nmap_result=nmap_result_raw.split('\n')
@@ -1709,15 +1709,11 @@ def host_info(domain):
                                 try:
                                     os.mkdir(output_directory+'/nmap')
                                 except OSError:
-                                    pass
                                     nmap_command_temp='nmap '+nmap_scantype+' ' + ip + ' -oA '+output_directory+'/nmap/'+ip
-
                             # Do the nmap
                             nmap_command=shlex.split(nmap_command_temp)
                             nmap_result_raw=Popen(nmap_command, stdout=PIPE).communicate()[0]
                             nmap_result=nmap_result_raw.split('\n')
-
-                        
                             #
                             # Now analyze nmaps output
                             # Searching for ports, service and scripts info
@@ -1823,7 +1819,7 @@ def host_info(domain):
                 pass
             # Move everything to xml directory
             try:
-                os.system('mv '+output_directory+'/nmap/*.xml '+output_directory+'/nmap/xml')
+                os.system('mv ' + output_directory +'/nmap/*.xml ' + output_directory + '/nmap/xml')
             except Exception as inst:
                 print('There was an error moving the xml files to the xml folder for zenmap. Trying to continue.')
                 print type(inst)     # the exception instance
@@ -2070,6 +2066,7 @@ def analyze_domain(domain):
         global robtex_domains
         global all_robtex
         global domains_still_to_analyze
+        global zenmap_command
 
         domain_data={}
         domain_data['IpsInfo']={}
@@ -2103,7 +2100,6 @@ def analyze_domain(domain):
                 except OSError:
                     try:
                         logging.warning('\tOutput directory already exists, press CTRL-C NOW if you want to override the files on it.')
-                        #logging.warning('\tOutput directory already exists, exiting.')
                         time.sleep(2)
                         return (-1)
                     except KeyboardInterrupt:
@@ -2141,7 +2137,7 @@ def analyze_domain(domain):
                 # If zenmap was selected, open zenmap with the topolog
                 if zenmap == 1:
                     # Do it more generic so other systems can use zenmap 
-                    command_line='zenmap ' + output_directory + '/nmap/xml'
+                    command_line = zenmap_command + ' ' + output_directory + '/nmap/xml'
                     args = shlex.split(command_line)
                     Popen(args)
                 # Are you sure about this?
@@ -2568,6 +2564,7 @@ def main():
         global domains_still_to_analyze
         global download_files
         global all_robtex
+        global zenmap_command
 
         domain=""
 
@@ -2616,25 +2613,21 @@ def main():
             root = logging.getLogger()
             root.setLevel(logging.DEBUG)
             root.addHandler(ColorizingStreamHandler())
-
-
+        # print version
         version()
-
         # Change socket timeout
         # This avoids some ZT tries to last for ever!
         socket.setdefaulttimeout(10)
-
         # Change nmap options
         if '-p' in nmap_scantype:
             nmap_scantype.replace('-F','')
-
         # Make sure zenmap binary is there
         if zenmap:
             if call("type zenmap", shell=True, stdout=PIPE, stderr=PIPE) == 0:
                 # Most linux
                 # zenmap exists
                 zenmap_command = 'zenmap'
-            elif call("type /Applications/Zenmap.app/Contents/Resources/bin/zenmap", shell=True, stdout=PIPE, stderr=PIPE) == 0:
+            elif call("type /Applications/Zenmap.app/Contents/MacOS/zenmap.bin", shell=True, stdout=PIPE, stderr=PIPE) == 0:
                 # For macos installed with the dmg for zenmap
                 # zenmap exists
                 zenmap_command = '/Applications/Zenmap.app/Contents/Resources/bin/zenmap'
@@ -2642,13 +2635,10 @@ def main():
                 # No zenmap
                 zenmap = False
                 print('Zenmap disabled because it was not found in the system.')
-        print 'zenmap found in {}'.format(zenmap_command)
-
         #
         # Normal way, NOT World Domination!
         #
         if len(domain)!=0 and world_domination == False:
-            
             # Check if zenmap and 'not nmap' options are not enabled at the same time
             if zenmap == 1 and nmap == 0:
                 logging.warning('\tWarning. You request to use Zenmap but disable the use of nmap. Do not use -a option if you want -e option.')
@@ -2668,39 +2658,28 @@ def main():
                 try:
                     import GeoIP
                     geoip_cache = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
-
                 except:
                     countrys=False
                     logging.warning('\tWARNING!! You don\'t have GeoIP libraries. apt-get install python-geoip\n\n')
-
             # If selected, find N random domains and analyze them
             if amount_of_random_domains:
                 domain_list = find_and_analyze_random_domains(domain, amount_of_random_domains)
             else:
                 # Common analysis of one domain
-
                 domains_still_to_analyze.append(domain)
-
-
                 # For every domain found, we analyze them
                 for unrelated_domain in domains_still_to_analyze:
                     print
                     logging.info('Domains still to check: {0}'.format(len(domains_still_to_analyze)))
-
-
                     # Analyze the main domain
                     analyze_domain(unrelated_domain)
-
                     # We delete it from the list
                     domains_still_to_analyze.remove(unrelated_domain)
-
-
             # Now we will analyze each subdomain found
             if not_subdomains == False:
                 for subdomain in subdomains_found:
                     print
                     analyze_domain(subdomain)
-
         # WORLD DOMINATION!!!!
         # We don't recomend to use world-domination and robin-hood at the same time...
         elif world_domination == True and robin_hood == False and nmap==0:
