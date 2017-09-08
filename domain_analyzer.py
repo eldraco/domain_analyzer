@@ -2063,7 +2063,7 @@ def analyze_domain(domain):
                     logging.debug('\t\t> Checking if {0} is a domain...'.format(domain),)
                 host_name_ns = dns.resolver.query(domain, 'NS')
             except:
-                logging.error('\tThe given name doesn\'t seem to be a domain since there are no NS servers assigned to it. Stopping.\n')
+                logging.error('\tThe given name doesn\'t seem to be a domain since there are no NS servers assigned to it. Stopping.')
                 logging.error('\tThe dnspython library in macos can not find domains such as com. It is a bug in the library. Linux can.\n')
                 return -1 
             # Now we are sure its a domain!
@@ -2620,6 +2620,15 @@ def main():
                 # No zenmap
                 zenmap = False
                 print('Zenmap disabled because it was not found in the system.')
+        # Add a . to the domain name. This is to avoid somo local DNS searches, specially in macos. Where the domain can appear as non existant. 
+        # This allow us to search for TLDs such as 'com' domain. The final query is then 'com.' 
+        # In the case of normal domains, such as, 'test.com', the query ends up being 'test.com.'
+        domain += '.'
+        # Control that the domain name does not start with a '.'
+        if domain[0] == '.':
+            domain = domain[1:]
+            print("Domains should not start with a '.'. So I\'m stripping it off. The domain I\'m looking for now is: {}".format(domain))
+
         #
         # Normal way, NOT World Domination!
         #
