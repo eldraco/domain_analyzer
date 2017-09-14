@@ -279,8 +279,7 @@ class PyText2Pdf(object):
         
         try:
             self._ifs=open(self._ifile)
-        except IOError as xxx_todo_changeme:
-            (strerror, errno) = xxx_todo_changeme.args
+        except IOError:
             print('Error: Could not open file to read --->', self._ifile)
             sys.exit(3)
 
@@ -289,8 +288,7 @@ class PyText2Pdf(object):
 
         try:
             self._ofs = open(self._ofile, 'wb')
-        except IOError as xxx_todo_changeme1:
-            (strerror, errno) = xxx_todo_changeme1.args
+        except IOError:
             print('Error: Could not open file to write --->', self._ofile)
             sys.exit(3)
 
