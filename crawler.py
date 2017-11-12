@@ -63,8 +63,13 @@ search for links in it. Actually only detect HREF links. See -h option to get a 
 import sys
 import re
 import getopt
-import urllib2
-import urlparse
+if sys.version_info[0] < 3:
+    from urllib2 import Request, build_opener, HTTPError, URLError
+    from urlparse import urlparse
+else:
+    from urllib.request import urlopen as Request, build_opener
+    from urllib.error import HTTPError, URLError
+    from urllib.parse import urlparse
 import copy
 import os
 import time
@@ -169,52 +174,52 @@ def version():
     """
     This function prints the version of this program. It doesn't allow any argument.
     """
-    print "+----------------------------------------------------------------------+"
-    print "| "+ sys.argv[0] + " Version "+ vernum +"                                      |"
-    print "| This program is free software; you can redistribute it and/or modify |"
-    print "| it under the terms of the GNU General Public License as published by |"
-    print "| the Free Software Foundation; either version 2 of the License, or    |"
-    print "| (at your option) any later version.                                  |"
-    print "|                                                                      |"
-    print "| Author: Garcia Sebastian, eldraco@gmail.com                          |"
-    print "| Author: Veronica Valeros, vero.valeros@gmail.com                     |"
-    print "| www.mateslab.com.ar - Argentina                                      |"
-    print "+----------------------------------------------------------------------+"
-    print
+    print("+----------------------------------------------------------------------+")
+    print("| {} Version {}                                      |".format(sys.argv[0], vernum))
+    print("| This program is free software; you can redistribute it and/or modify |")
+    print("| it under the terms of the GNU General Public License as published by |")
+    print("| the Free Software Foundation; either version 2 of the License, or    |")
+    print("| (at your option) any later version.                                  |")
+    print("|                                                                      |")
+    print("| Author: Garcia Sebastian, eldraco@gmail.com                          |")
+    print("| Author: Veronica Valeros, vero.valeros@gmail.com                     |")
+    print("| www.mateslab.com.ar - Argentina                                      |")
+    print("+----------------------------------------------------------------------+")
+    print()
 
 # Print help information and exit:
 def usage():
     """
     This function prints the posible options of this program.
     """
-    print "+----------------------------------------------------------------------+"
-    print "| "+ sys.argv[0] + " Version "+ vernum +"                                      |"
-    print "| This program is free software; you can redistribute it and/or modify |"
-    print "| it under the terms of the GNU General Public License as published by |"
-    print "| the Free Software Foundation; either version 2 of the License, or    |"
-    print "| (at your option) any later version.                                  |"
-    print "|                                                                      |"
-    print "| Author: Garcia Sebastian, eldraco@gmail.com                          |"
-    print "| Author: Veronica Valeros, vero.valeros@gmail.com                     |"
-    print "| www.mateslab.com.ar - Argentina                                      |"
-    print "+----------------------------------------------------------------------+"
-    print 
-    print "\nUsage: %s <options>" % sys.argv[0]
-    print "Options:"
-    print "  -u, --url                            URL to start crawling."
-    print "  -m, --max-amount-to-crawl           Max deep to crawl. Using breadth first algorithm"
-    print "  -w, --write-to-file                  Save summary of crawling to a text file. Output directory is created automatically."
-    print "  -s, --subdomains                     Also scan subdomains matching with url domain."
-    print "  -r, --follow-redirect                Do not follow redirect. By default follow redirection at main URL." 
-    print "  -f, --fetch-files                    Download there every file detected in 'Files' directory. Overwrite existing content."
-    print "  -F, --file-extension                 Download files specified by comma separated extensions. This option also activates 'fetch-files' option. 'Ex.: -F pdf,xls,doc' " 
-    print "  -d, --docs-files                     Download docs files:xls,pdf,doc,docx,txt,odt,gnumeric,csv, etc. This option also activates 'fetch-files' option." 
-    print "  -E, --exclude-extensions             Do not download files that matches with this extensions. Options '-f','-F' or '-d' needed." 
-    print "  -h, --help                           Show this help message and exit."
-    print "  -V, --version                        Output version information and exit."
-    print "  -v, --verbose                        Be verbose"
-    print "  -D, --debug                          Debug."
-    print
+    print("+----------------------------------------------------------------------+")
+    print("| {} Version {}                                      |".format(sys.argv[0], vernum))
+    print("| This program is free software; you can redistribute it and/or modify |")
+    print("| it under the terms of the GNU General Public License as published by |")
+    print("| the Free Software Foundation; either version 2 of the License, or    |")
+    print("| (at your option) any later version.                                  |")
+    print("|                                                                      |")
+    print("| Author: Garcia Sebastian, eldraco@gmail.com                          |")
+    print("| Author: Veronica Valeros, vero.valeros@gmail.com                     |")
+    print("| www.mateslab.com.ar - Argentina                                      |")
+    print("+----------------------------------------------------------------------+")
+    print()
+    print("\nUsage: {} <options>".format(sys.argv[0]))
+    print("Options:")
+    print("  -u, --url                            URL to start crawling.")
+    print("  -m, --max-amount-to-crawl           Max deep to crawl. Using breadth first algorithm")
+    print("  -w, --write-to-file                  Save summary of crawling to a text file. Output directory is created automatically.")
+    print("  -s, --subdomains                     Also scan subdomains matching with url domain.")
+    print("  -r, --follow-redirect                Do not follow redirect. By default follow redirection at main URL." )
+    print("  -f, --fetch-files                    Download there every file detected in 'Files' directory. Overwrite existing content.")
+    print("  -F, --file-extension                 Download files specified by comma separated extensions. This option also activates 'fetch-files' option. 'Ex.: -F pdf,xls,doc' " )
+    print("  -d, --docs-files                     Download docs files:xls,pdf,doc,docx,txt,odt,gnumeric,csv, etc. This option also activates 'fetch-files' option." )
+    print("  -E, --exclude-extensions             Do not download files that matches with this extensions. Options '-f','-F' or '-d' needed." )
+    print("  -h, --help                           Show this help message and exit.")
+    print("  -V, --version                        Output version information and exit.")
+    print("  -v, --verbose                        Be verbose")
+    print("  -D, --debug                          Debug.")
+    print()
     sys.exit(1)
 
 #################
@@ -280,19 +285,19 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
     
     #Program
     try:
-        print '\t+ URL to crawl: {0}'.format(site_url)
-        print '\t+ Date: {0}\n'.format(str(datetime.date.today()))
+        print('\t+ URL to crawl: {0}'.format(site_url))
+        print('\t+ Date: {0}\n'.format(str(datetime.date.today())))
         if site_url.__len__() != 0:
             # We extract and store the domain to crawl to limit the crawl to this domain exclusively
             # If site_url is 'http://www.site.com' then main_domain= 'site.com' and host_name='www.site.com'
-            url_parsed=urlparse.urlparse(site_url)
+            url_parsed=urlparse(site_url)
             if url_parsed.scheme == "" or len(url_parsed.scheme)>5:
                 url_scheme="http"
                 site_url=url_scheme+'://'+site_url
             else:
                 url_scheme=url_parsed.scheme
             
-            url_parsed=urlparse.urlparse(site_url)
+            url_parsed=urlparse(site_url)
             host_name=url_parsed.netloc
             main_domain=host_name
             
@@ -309,8 +314,8 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                 accept_domain=host_name
             
             # We crawl the first URL given by user
-            print '\t+ Crawling URL: {0}:'.format(site_url)
-            print '\t\t+ Links:',
+            print('\t+ Crawling URL: {0}:'.format(site_url))
+            print('\t\t+ Links:',)
         
             url_tmp = site_url
             # max_amount_to_crawl defines how many URLs are going to be crawled. By default 5000 is the max.
@@ -318,7 +323,7 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
             while max_amount_to_crawl:
                 # We inform in debug mode how many URLs we have crawled and the max amount of URL to crawl 
                 if debug:
-                    print '\n\t\t\t> Crawling URL {0} up to max {1} urls'.format(url_tmp,max_amount_to_crawl),
+                    print('\n\t\t\t> Crawling URL {0} up to max {1} urls'.format(url_tmp,max_amount_to_crawl),)
             
                 # We crawl the url
                 # crawl_url() function populates the variable URL
@@ -328,31 +333,31 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                     pass
                 elif exit_status == -2:
                     try:
-                        print '\n\t\t\t\t> Keyboard interruption! Waiting 1 seconds to continue crawling the next URL'
-                        print '\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to crawl!'
+                        print('\n\t\t\t\t> Keyboard interruption! Waiting 1 seconds to continue crawling the next URL')
+                        print('\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to crawl!')
                         time.sleep(1.5)
                         pass
                     except KeyboardInterrupt:
                         break    
                 elif exit_status == -3:
                     if debug or max_amount_to_crawl < 2:
-                        print '\n\t\t\t\t> No more URLs to crawl.' 
+                        print('\n\t\t\t\t> No more URLs to crawl.' )
                 elif exit_status == -4:
-                    print '(File! Not crawling it.)',
+                    print('(File! Not crawling it.)',)
                     max_amount_to_crawl=max_amount_to_crawl+1
                 else:
                     if debug:
-                        print '\n\t\t\t> URL crawled successfully',
+                        print('\n\t\t\t> URL crawled successfully',)
                 
                 # We extract next url to crawl
                 try:
                     url_tmp=URL[0]
                     URL.remove(url_tmp)
                     if debug:
-                        print '\n\t\t\t> Removed url {0}. {1} URLs found so far'.format(url_tmp,len(URL)),
+                        print('\n\t\t\t> Removed url {0}. {1} URLs found so far'.format(url_tmp,len(URL)),)
                 except:
                     if debug:
-                        print '\n\t\t\t> The URL vector is empty. No more URLs to crawl'
+                        print('\n\t\t\t> The URL vector is empty. No more URLs to crawl')
                     max_amount_to_crawl=0
                     continue
 
@@ -361,13 +366,13 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                     max_amount_to_crawl=max_amount_to_crawl-1
 
                 if debug:
-                    print '\n\t\t\t> We decrement the integer max_amount_to_crawl to {0}'.format(max_amount_to_crawl),
+                    print('\n\t\t\t> We decrement the integer max_amount_to_crawl to {0}'.format(max_amount_to_crawl),)
 
             if crawled.__len__() <= 1:
                 result = directory_indexing()
                 if (fetch_files_opt):
                     if debug:
-                        print '\n\t\t> Descargando files...',
+                        print('\n\t\t> Descargando files...',)
                     result = fetch_files()
                 output_data['LinksCrawled']=crawled
                 output_data['LinksToFiles']=link_to_files
@@ -375,14 +380,14 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                 output_data['Emails']=emails
                 output_data['Directories']=directories
                 output_data['DirectoriesWithIndexing']=directories_with_indexing
-                print '\n'
+                print('\n')
                 return -1
             else:
                 # We identify directories on crawled URLs and check for indexing in them
                 result = directory_indexing()
                 if (fetch_files_opt):
                     if debug:
-                        print '\n\t\t> Descargando files...',
+                        print('\n\t\t> Descargando files...',)
                     result = fetch_files()
                 # Here we sort the vectors to print in a nice way.
                 crawled.sort()
@@ -395,19 +400,19 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
 
                 if write_to_file:
                     if debug:
-                        print '\n\t\t> Guardando en disco la informacion...'
+                        print('\n\t\t> Guardando en disco la informacion...')
                     host_name=base_url_to_crawl
                     result = print_to_file()
                 
-                print '\n\t+ Crawl finished successfully.'
+                print('\n\t+ Crawl finished successfully.')
                 if debug:
-                    print '\t\t> Calling Printout() function...'
+                    print('\t\t> Calling Printout() function...')
                 printout()
 
                 base_url_to_crawl=""
                 
                 if debug:
-                    print '\t\t> Clean exit. Return 1'
+                    print('\t\t> Clean exit. Return 1')
 
                 output_data['LinksCrawled']=crawled
                 output_data['LinksToFiles']=link_to_files
@@ -420,11 +425,11 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
 
         else:
             #printout()
-            print '\t> Check if the URL is like "http://xxx.xxxxx.xx". Exiting.'
+            print('\t> Check if the URL is like "http://xxx.xxxxx.xx". Exiting.')
             return -3
         
     except:
-        print '\t\t> Error in crawl site'
+        print('\t\t> Error in crawl site')
         return -4
         
     
@@ -484,20 +489,19 @@ def crawl_url(url_base):
         except:
             pass
 
-        print '\n\t\t\t+ Crawling {0}'.format(url_to_crawl),
+        print('\n\t\t\t+ Crawling {0}'.format(url_to_crawl),)
         
         # We parse the URL to identify domains and paths of the URL
-        url = urlparse.urlparse(url_to_crawl)
+        url = urlparse(url_to_crawl)
         
         # Here we get the data of the URL
         try:
             # Here we set a timeout to limit response time.
             #socket.setdefaulttimeout(5)
             if debug:
-                print '\n\t\t\t\t> Asking for response...',
-            request_web = urllib2.Request(url_to_crawl.replace(" ","%20"))
-            request_web.add_header('User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
-            opener_web = urllib2.build_opener()
+                print('\n\t\t\t\t> Asking for response...',)
+            request_web = Request(url_to_crawl.replace(" ","%20"), headers={'User-Agent' : 'Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)'}) # Python3 and Python2 compliant
+            opener_web = build_opener()
             response = opener_web.open(request_web)
 
             if not response.headers.typeheader.startswith('text/html'):
@@ -507,23 +511,23 @@ def crawl_url(url_base):
 
             # We add the url to the list of crawled URLs if this exist
             crawled.append(url_to_crawl)
-        except urllib2.HTTPError,error_code:
+        except HTTPError as error_code:
             if debug:
-                print '\n'
+                print('\n')
             if error_code.getcode() == 302:
                 link = linkregex.findall(error_code.read()).pop(0)
-                print '(REDIRECTING TO: {0})'.format(link),
+                print('(REDIRECTING TO: {0})'.format(link),)
                 #print 'Link redirection: {0}'.format(link.pop(0))
                 crawled.append(url_to_crawl + ' (REDIRECTS TO: ' + link + ')')
             else:
-                print ' ({0})'.format(error_codes[str(error_code.getcode())]),
+                print(' ({0})'.format(error_codes[str(error_code.getcode())]),)
                 crawled.append(url_to_crawl + ' (' + error_codes[str(error_code.getcode())] + ')')
             return -1    
-        except urllib2.URLError,error_code:
+        except URLError as error_code:
             if debug:
-                print '\n\t\t\t\t> ({0})'.format(error_code.reason)
+                print('\n\t\t\t\t> ({0})'.format(error_code.reason))
             else:
-                print ' ({0})'.format(error_code.reason),
+                print(' ({0})'.format(error_code.reason),)
             crawled_url='{0} ({1})'.format(url_to_crawl,error_code.reason)
             if crawled_url not in crawled:
                 crawled.append(crawled_url)
@@ -531,7 +535,7 @@ def crawl_url(url_base):
         
         # We got a response! Reading it and store it in msg
         if debug:
-            print '\n\t\t\t\t> Reading response obtained...'
+            print('\n\t\t\t\t> Reading response obtained...')
         msg = response.read()
         
         # If you really want to see the response of each link crawled uncomment the following two lines
@@ -542,12 +546,12 @@ def crawl_url(url_base):
         links = linkregex.findall(msg)
         if not(links):
             if debug:
-                print '\t\t\t\t> No links found in this URL.'
+                print('\t\t\t\t> No links found in this URL.')
             links = linkredirect.findall(msg)
             if not (links):
                 return -1
             else:
-                print '(REDIRECTING TO: {0})'.format(links[0]),
+                print('(REDIRECTING TO: {0})'.format(links[0]),)
                 crawled[crawled.index(url_to_crawl)] = url_to_crawl + ' (REDIRECTS TO: ' + links[0] + ')'
                 return 1
         
@@ -556,7 +560,7 @@ def crawl_url(url_base):
             if len(link) > 2:
                 link_full_path=""
                 if debug:
-                    print '\t\t\t\t> Link extracted: {0}'.format(link)
+                    print('\t\t\t\t> Link extracted: {0}'.format(link))
                 try:
                     try:
                         #if url.path != "" and not url.path.endswith('/'):
@@ -572,22 +576,22 @@ def crawl_url(url_base):
                             link_full_path = url.scheme + '://' + url.netloc
                         
                     except:
-                        print 'error in setting link path'
+                        print('error in setting link path')
                     link=verify_link(link)
                     if link <= 0:
                         continue
                     if debug:
-                        print '\t\t\t\t\t> Link absolute path: {0}'.format(link)
+                        print('\t\t\t\t\t> Link absolute path: {0}'.format(link))
                     
                 except:
-                    print '\t\t\t\t\t> Function verify_link() is not working'
+                    print('\t\t\t\t\t> Function verify_link() is not working')
                 
                 # We only add links not found yet
                 if link not in allfiles:
                     allfiles.append(link)
                 
                     if link not in crawled:
-                        link_domain=urlparse.urlparse(link).netloc
+                        link_domain=urlparse(link).netloc
 
                         # Here we verify that the link is associated to the main domain
                         if sub_domains:
@@ -609,7 +613,7 @@ def crawl_url(url_base):
                                         if link not in link_to_files:
                                             link_to_files.append(link)
                                             if debug:
-                                                print '\t\t\t\t\t>> Found new link to file!: {0}'.format(link)
+                                                print('\t\t\t\t\t>> Found new link to file!: {0}'.format(link))
                                             break
 
                             # If after analysing the link it is not pointing to file we check it 
@@ -618,24 +622,24 @@ def crawl_url(url_base):
                                 if link not in URL:
                                     URL.append(link)
                                     if debug:
-                                        print '\t\t\t\t\t>> Found new link!: {0}'.format(link)
+                                        print('\t\t\t\t\t>> Found new link!: {0}'.format(link))
                                 else:
                                     if debug:
-                                        print '\t\t\t\t> Seems that {0} already in URL'.format(link)
+                                        print('\t\t\t\t> Seems that {0} already in URL'.format(link))
                                     continue
                         else:
                             if link not in externals and link != '/':
                                 externals.append(link)
                                 if debug and verbose:
-                                    print '\t\t\t\t\t>> Found a external link: {0}'.format(link)
+                                    print('\t\t\t\t\t>> Found a external link: {0}'.format(link))
                             elif debug and verbose:
-                                print '\t\t\t\t> External link: {0} already stored'.format(link)
+                                print('\t\t\t\t> External link: {0} already stored'.format(link))
                     else:
                         if debug:
-                            print '\t\t\t\t> Link {0} already crawled'.format(link)
+                            print('\t\t\t\t> Link {0} already crawled'.format(link))
             else:
                 if debug:
-                    print '\t\t\t\t> Link \'{0}\' does not have enought lenght to be crawled'.format(link)
+                    print('\t\t\t\t> Link \'{0}\' does not have enought lenght to be crawled'.format(link))
                                     
 
     except KeyboardInterrupt:
@@ -661,13 +665,13 @@ def verify_link(link):
     
     try:
         if debug:
-            print '\t\t\t\t\t> Entering to verify_link function'
+            print('\t\t\t\t\t> Entering to verify_link function')
         for i in splitters:
             try:
                 link.split(i)[1]
                 link = link.split(i)[0]
                 if debug and verbose:
-                    print '\t\t\t\t> Link has a \'{0}\' reference. It has been removed.'.format(i)
+                    print('\t\t\t\t> Link has a \'{0}\' reference. It has been removed.'.format(i))
                 if link == "":
                     return -1
                 break
@@ -678,7 +682,7 @@ def verify_link(link):
         try:
             email=link.split('mailto:')[1]
             if debug and verbose:
-                print '\t\t\t\t\t> Link have a "mailto:" reference. Email: {0}'.format(email)
+                print('\t\t\t\t\t> Link have a "mailto:" reference. Email: {0}'.format(email))
             if (email.find(main_domain)!= -1):    
                 try:
                     email.split('?')[1]
@@ -688,12 +692,12 @@ def verify_link(link):
                 if email not in emails:
                     emails.append(email)
                 if verbose and debug:
-                    print '\n\t\t\t\t- Email found: {0}'.format(email),
+                    print('\n\t\t\t\t- Email found: {0}'.format(email),)
             link=link.split('mailto:')[0]
         except:
             pass
 
-        link_parsed = urlparse.urlparse(link)
+        link_parsed = urlparse(link)
         if link_parsed.scheme:
             return link
         
@@ -785,13 +789,13 @@ def identify_directories():
     domain=url_scheme+'://'+host_name
     
     #Programa
-    print '\n\t\t+ Searching for directories...'
+    print('\n\t\t+ Searching for directories...')
     
     try:
         for link_url in crawled:
             try:
                 if debug:
-                    print '\t\t\t\t> Link extracted from "crawled": {0}'.format(link_url)
+                    print('\t\t\t\t> Link extracted from "crawled": {0}'.format(link_url))
                 # Here we eliminate error or status comments in URLs crawled.
                 try:
                     link_url.split('(')[1]
@@ -802,7 +806,7 @@ def identify_directories():
                 # We store in tmp1 the complete path without domain
                 link_directory_tmp1 = link_url.split(domain)[1]
                 if debug:
-                    print '\t\t\t\t> Path extracted form link: {0}'.format(link_directory_tmp1)
+                    print('\t\t\t\t> Path extracted form link: {0}'.format(link_directory_tmp1))
                 
                 # We separate the path to stay with last directory in it    
                 link_directory_tmp2 = link_directory_tmp1.split('/')[1:-1]
@@ -813,11 +817,11 @@ def identify_directories():
                     link_directory = domain+'/'+dir_tmp
                     if link_directory not in directories:
                         directories.append(link_directory)    
-                        print '\t\t\t- Found: {0}'.format(link_directory)
+                        print('\t\t\t- Found: {0}'.format(link_directory))
             except KeyboardInterrupt:
                 try:
-                    print '\t\t\t\t> Keyboard interrupt while iterating crawled vector. Waiting 1 seconds to continue.'
-                    print '\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to analyze!'
+                    print('\t\t\t\t> Keyboard interrupt while iterating crawled vector. Waiting 1 seconds to continue.')
+                    print('\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to analyze!')
                     time.sleep(1.5)
                     continue
                 except KeyboardInterrupt:
@@ -829,12 +833,12 @@ def identify_directories():
         for link_url in link_to_files:
             try:
                 if debug:
-                    print '\t\t\t\t> Link extracted from "link_to_files": {0}'.format(link_url)
+                    print('\t\t\t\t> Link extracted from "link_to_files": {0}'.format(link_url))
 
                 # We store in tmp1 the complete path without domain
                 link_directory_tmp1 = link_url.split(domain)[1]
                 if debug:
-                    print '\t\t\t\t> Path extracted form link: {0}'.format(link_directory_tmp1)
+                    print('\t\t\t\t> Path extracted form link: {0}'.format(link_directory_tmp1))
                 
                 # We separate the path to stay with last directory in it    
                 link_directory_tmp2 = link_directory_tmp1.split('/')[1:-1]
@@ -845,12 +849,12 @@ def identify_directories():
                     link_directory = domain+'/'+dir_tmp
                     if link_directory not in directories:
                         directories.append(link_directory)    
-                        print '\t\t\t- Found: {0}'.format(link_directory)
+                        print('\t\t\t- Found: {0}'.format(link_directory))
                     
             except KeyboardInterrupt:
                 try:
-                    print '\t\t\t\t> Keyboard interrupt while iterating crawled vector. Waiting 1 seconds to continue.'
-                    print '\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to analyze!'
+                    print('\t\t\t\t> Keyboard interrupt while iterating crawled vector. Waiting 1 seconds to continue.')
+                    print('\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to analyze!')
                     time.sleep(1.5)
                     continue
                 except KeyboardInterrupt:
@@ -859,11 +863,11 @@ def identify_directories():
                 pass
 
     except KeyboardInterrupt:
-        print '\t\t\t\t> Keyboard interrupt while searching for directories! Exiting.'
+        print('\t\t\t\t> Keyboard interrupt while searching for directories! Exiting.')
         #sys.exit (1)
         return -6
     except:
-        print '\t\t\t\t> Exception in looking for directories. Exiting.'
+        print('\t\t\t\t> Exception in looking for directories. Exiting.')
         #sys.exit (1)
         return -5
 
@@ -896,7 +900,7 @@ def directory_indexing():
         # First we identify directories on site already crawled
         identify_directories()
 
-        print '\t\t+ Searching open folders...',
+        print('\t\t+ Searching open folders...',)
 
         #Checking for directory indexing
         directories_with_indexing = []
@@ -907,40 +911,40 @@ def directory_indexing():
             dir_tmp=""
             try:
                 if directory not in directories_with_indexing:
-                    print '\n\t\t\t- {0}'.format(directory),
+                    print('\n\t\t\t- {0}'.format(directory),)
                     if debug: 
-                        print '\n\t\t\t\t> Directory to analyze: {0}'.format(directory)
-                    dir_response = urllib2.urlopen(directory.replace(' ','%20'))
+                        print('\n\t\t\t\t> Directory to analyze: {0}'.format(directory))
+                    dir_response = Request(directory.replace(' ','%20'))
                     dir_msg = dir_response.read()
                 
                     if 'Index of' in dir_msg:
-                        print '\n\t\t\t>>> Directory indexing at: {0}'.format(directory),
+                        print('\n\t\t\t>>> Directory indexing at: {0}'.format(directory),)
                         directories_with_indexing.append(directory)
                         result['DirIndex']=directory
                         a={}
                         a=copy.deepcopy(result)
                         crawl_results.append(a)
                         if debug:
-                            print '\n\t\t\t\t> Directory appended to crawl_results',
+                            print('\n\t\t\t\t> Directory appended to crawl_results',)
                     else:
                         dir_tmp = directory+' (No open folder)'
                         directories[directories.index(directory)] = dir_tmp
-                        print ' (No Open Folder)',
+                        print(' (No Open Folder)',)
                 
-            except urllib2.HTTPError,error_code:
+            except HTTPError as error_code:
                 code=error_codes[str(error_code.getcode())]
-                print '({0})'.format(code),
+                print('({0})'.format(code),)
                 dir_tmp = directory+' ('+code+')'
                 directories[directories.index(directory)] = dir_tmp
 
-            except urllib2.URLError,error_code:
-                print ' ({0})'.format(error_code.reason),
+            except URLError as error_code:
+                print(' ({0})'.format(error_code.reason),)
                 dir_tmp = directory+' ('+error_code.reason+')'
                 directories[directories.index(directory)] = dir_tmp
             except KeyboardInterrupt:
                 try:
-                    print '\n\t\t\t\t> Keyboard interrupt while looking for directory indexing. Waiting 1 seconds to continue.'
-                    print '\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to analyze!',
+                    print('\n\t\t\t\t> Keyboard interrupt while looking for directory indexing. Waiting 1 seconds to continue.')
+                    print('\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to analyze!',)
                     time.sleep(1.5)
                     continue
                 except KeyboardInterrupt:
@@ -949,17 +953,17 @@ def directory_indexing():
                 # If we are here is because not indexing in directory found
                 dir_tmp = directory+' (No open folder)'
                 directories[directories.index(directory)] = dir_tmp
-                print ' (No Open Folder)',
+                print(' (No Open Folder)',)
                 pass
 
         main_domain_tmp = main_domain
         host_name_tmp = host_name
         if directories_with_indexing.__len__() > 0:    
-            print '\n\t\t+ Crawling directories with indexing:',
+            print('\n\t\t+ Crawling directories with indexing:',)
             for dir_tmp in directories_with_indexing:
                 URL=[]
                 #socket.setdefaulttimeout(30)
-                dir_tmp_parsed = urlparse.urlparse(dir_tmp)
+                dir_tmp_parsed = urlparse(dir_tmp)
                 main_domain = dir_tmp_parsed.netloc
                 host_name = dir_tmp_parsed.netloc + dir_tmp_parsed.path
                 
@@ -967,14 +971,14 @@ def directory_indexing():
 
             main_domain = main_domain_tmp
             host_name=host_name_tmp
-            print '\n\t\t+ Crawling directories with indexing finished',
+            print('\n\t\t+ Crawling directories with indexing finished',)
             return 1
     except KeyboardInterrupt:
-        print '\n\t\t\t\t> Keyboard interrupt while searching for directory indexing! Exiting.'
+        print('\n\t\t\t\t> Keyboard interrupt while searching for directory indexing! Exiting.')
         #sys.exit (1)
         return -9
     except:
-        print '\n\t\t\t\t> Problems in searching for open folders or crawling again the folders with indexing.'
+        print('\n\t\t\t\t> Problems in searching for open folders or crawling again the folders with indexing.')
 
 
 #############
@@ -992,7 +996,7 @@ def fetch_files():
     #global extensions_for_download 
 
     try:
-        print '\n\t\t+ Fetching found files:'
+        print('\n\t\t+ Fetching found files:')
         try:
             try:
                 output_directory= main_domain.replace('http://','')
@@ -1012,7 +1016,7 @@ def fetch_files():
             output_directory = output_directory+'/Files/'
             os.mkdir(output_directory)
 
-        except OSError,error:
+        except OSError as error:
             if 'File exists' in error:
                 try:
                     if 'Files' in output_directory:
@@ -1020,45 +1024,45 @@ def fetch_files():
                     else: 
                         output_directory = output_directory+'/Files/'
                         os.mkdir(output_directory)
-                except OSError,error:
+                except OSError as error:
                     if 'File exists' in error:
-                        print '\t\t> Output directory already exists! Overwriting content!'
+                        print('\t\t> Output directory already exists! Overwriting content!')
                     else:
-                        print '\t\t\t\t> Cannot create output directory! Not downloading files:'
+                        print('\t\t\t\t> Cannot create output directory! Not downloading files:')
                         return -15 
 
-        print '\t\t\t- Files stored in: {0}'.format(output_directory)
+        print('\t\t\t- Files stored in: {0}'.format(output_directory))
         if verbose:
-            print '\t\t\t- File extensions included:',
+            print('\t\t\t- File extensions included:',)
             for ext in extensions_for_download:
                 if ext.islower():
-                    print ext,
-            print '\n'
+                    print( ext,)
+            print('\n')
         for i in link_to_files:
             for ext in extensions_for_download:
                 if i.endswith(ext):
-                    print '\t\t\t+ Downloading file {0}'.format(i)
+                    print('\t\t\t+ Downloading file {0}'.format(i))
                     error = fetch_file(i, output_directory)
                     if error == -1:
-                        print '\t\t\t\t> Error saving file!'
+                        print('\t\t\t\t> Error saving file!')
                         pass
                     elif error == -11:
                         try:
-                            print '\t\t\t\t> Keyboard interrupt while looking for directory indexing. Waiting 1 seconds to continue.'
-                            print '\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to analyze!'
+                            print('\t\t\t\t> Keyboard interrupt while looking for directory indexing. Waiting 1 seconds to continue.')
+                            print('\t\t\t\t> Hit CTRL-C again to skip the rest of the URLs to analyze!')
                             time.sleep(1.5)
                             pass
                         except KeyboardInterrupt:
                             return -5
                     elif error == -12:
-                        print '\t\t\t\t> Exception in fetching file!'
+                        print('\t\t\t\t> Exception in fetching file!')
                         pass
                     else:
                         pass
         return 1
 
     except:
-        print '\t\t\t\t> Error in fetching files.'
+        print('\t\t\t\t> Error in fetching files.')
         return -1
 
 ############
@@ -1075,12 +1079,12 @@ def fetch_file(url_to_fetch,directory):
 
     try:
         socket.setdefaulttimeout(50)
-        web_file = urllib2.urlopen(url_to_fetch.replace(' ','%20'))
+        web_file = Request(url_to_fetch.replace(' ','%20'))
         
         try:
             local_file = directory+url_to_fetch.split('/')[-1]
             local_file = open(directory+url_to_fetch.split('/')[-1], 'w')
-        except OSError, error:
+        except OSError as error:
             if 'File exists' in error:
                 pass
             else:
@@ -1088,17 +1092,17 @@ def fetch_file(url_to_fetch,directory):
         local_file.write(web_file.read())
         local_file.close()
         return 1
-    except urllib2.HTTPError,error_code:
+    except HTTPError as error_code:
         try:
-            print '\t\t\t\t> ({0})'.format(error_codes[str(error_code.getcode())])
+            print('\t\t\t\t> ({0})'.format(error_codes[str(error_code.getcode())]))
         except:
-            print '\t\t\t\t> Error in requesting file'
+            print('\t\t\t\t> Error in requesting file')
         return -10    
-    except urllib2.URLError,error_code:
+    except URLError as error_code:
         if debug:
-            print '\t\t\t\t> ({0})'.format(error_code.reason)
+            print('\t\t\t\t> ({0})'.format(error_code.reason))
         else:
-            print '\t\t\t\t> ({0})'.format(error_code.reason)
+            print('\t\t\t\t> ({0})'.format(error_code.reason))
     except KeyboardInterrupt:
         return -11
     except:
@@ -1127,31 +1131,31 @@ def printout():
     count=0
 
     try:
-        print '----------------------------------------------------------------------'
-        print 'Summary of ' + url_scheme + '://' + host_name
-        print '----------------------------------------------------------------------'
+        print('----------------------------------------------------------------------')
+        print('Summary of ' + url_scheme + '://' + host_name)
+        print('----------------------------------------------------------------------')
         
         
         count=0
-        print '+ Links crawled:'
+        print('+ Links crawled:')
         for i in crawled:
-            print '\t- {0}'.format(i)
+            print('\t- {0}'.format(i))
             count=count+1
-        print '\tTotal links crawled: {0}'.format(count)
+        print('\tTotal links crawled: {0}'.format(count))
 
         count=0
-        print '\n+ Links to files found:'
+        print('\n+ Links to files found:')
         for i in link_to_files:
             count=count+1
-            print '\t- {0}'.format(i)
-        print '\tTotal links to files: {0}'.format(count)
+            print('\t- {0}'.format(i))
+        print('\tTotal links to files: {0}'.format(count))
 
         count=0
-        print '\n+ Externals links found:'
+        print('\n+ Externals links found:')
         for i in externals:
-            print '\t- {0}'.format(i)
+            print( '\t- {0}'.format(i))
             count=count+1
-        print '\tTotal external links: {0}'.format(count)
+        print('\tTotal external links: {0}'.format(count))
         
         
         """
@@ -1164,35 +1168,35 @@ def printout():
         """
         #Printing mails found
         count=0
-        print '\n+ Email addresses found:'
+        print('\n+ Email addresses found:')
         for mail in emails:
-            print '\t- {0}'.format(mail)
+            print('\t- {0}'.format(mail))
             count=count+1
-        print '\tTotal email address found: {0}'.format(count)
+        print('\tTotal email address found: {0}'.format(count))
 
         
         #Printing directories found
         count=0
-        print '\n+ Directories found:'
+        print('\n+ Directories found:')
         for i in directories:
-            print '\t- {0}'.format(i)
+            print('\t- {0}'.format(i))
             count=count+1
-        print '\tTotal directories: {0}'.format(count)
+        print('\tTotal directories: {0}'.format(count))
             
 
         #Printing directories with indexing activated
         count=0
-        print '\n+ Directory indexing found:'
+        print('\n+ Directory indexing found:')
         for i in directories_with_indexing:
-            print '\t- {0}'.format(i)
+            print('\t- {0}'.format(i))
             count=count+1
-        print '\tTotal directories with indexing: {0}'.format(count)
+        print('\tTotal directories with indexing: {0}'.format(count))
         
-        print '\n----------------------------------------------------------------------\n'
+        print('\n----------------------------------------------------------------------\n')
         return 1
 
     except KeyboardInterrupt:
-        print 'Keyboard Interrupt while printing! Exiting.'
+        print('Keyboard Interrupt while printing! Exiting.')
         return -1
     except:
         return -2
@@ -1235,19 +1239,19 @@ def print_to_file():
 
 
         if debug: 
-            print 'Output directory has been set: {0}'.format(output_directory)
+            print('Output directory has been set: {0}'.format(output_directory))
 
         try:
             if debug: 
-                print 'Creating output directory...'
+                print('Creating output directory...')
             os.mkdir(output_directory)
-        except OSError,error:
+        except OSError as error:
             if 'File exists' in error:
                 if debug:
-                    print '\t\t> Output directory already exists! Overwriting content!'
+                    print('\t\t> Output directory already exists! Overwriting content!')
                 pass
             else:
-                print '\t\t\t\t> Cannot create output directory! Not downloading files:'
+                print('\t\t\t\t> Cannot create output directory! Not downloading files:')
                 return -15 
         
         # temp is the file name of the summary outout
@@ -1255,7 +1259,7 @@ def print_to_file():
         temp = temp.replace('http://','')
         temp = temp.replace('/','_')
         if debug: 
-            print 'Saving file as: {0}/crawler_{1}'.format(output_directory,temp)
+            print('Saving file as: {0}/crawler_{1}'.format(output_directory,temp))
         f=open(output_directory+'/crawler_'+temp,'w')        
         f.writelines('--------------------------------------------------------------------\n')
         f.writelines('Sumary information of crawling site '+host_name+'\n')
@@ -1314,7 +1318,7 @@ def print_to_file():
         return 1
 
     except KeyboardInterrupt:
-        print 'Keyboard Interrupt while printing! Exiting.'
+        print('Keyboard Interrupt while printing! Exiting.')
         return -1
     except:
         return -2
@@ -1393,10 +1397,10 @@ def main():
                         redirect_link = redirect.split(' ')[0] + '/' + redirect.split(' ')[-1].split(')')[0]
                     else:
                         redirect_link = redirect.split(' ')[-1].split(')')[0]
-                    if crawled[0] != redirect_link and main_domain != urlparse.urlparse(redirect_link).netloc:
-                        print '\t+ Following redirection at:: {0}\n'.format(redirect_link)
+                    if crawled[0] != redirect_link and main_domain != urlparse(redirect_link).netloc:
+                        print('\t+ Following redirection at:: {0}\n'.format(redirect_link))
                         if debug:
-                            print '\t\t- URL: {0}, Redirection: {1}'.format(redirect.split(' ')[0],redirect.split(' ')[-1].split(')')[0])
+                            print('\t\t- URL: {0}, Redirection: {1}'.format(redirect.split(' ')[0],redirect.split(' ')[-1].split(')')[0]))
                         result = crawl_site(redirect_link,int(max_amount_to_crawl)+1)
                     else:
                         printout()
@@ -1409,7 +1413,7 @@ def main():
         
     except KeyboardInterrupt:
         # CTRL-C pretty handling
-        print 'Keyboard Interruption!. Exiting.'
+        print('Keyboard Interruption!. Exiting.')
         sys.exit(1)
 
 
