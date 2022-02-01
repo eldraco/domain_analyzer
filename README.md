@@ -129,7 +129,8 @@ If you have any issues with the GeoIP database, please download it from its orig
 
 
 # Requests
-If you have any question, please send us an email! They are in the python files.
+
+If you have any question create an issue and we will check it out; or send us an email.
 
 # Authors
 
