@@ -130,3 +130,15 @@ If you have any issues with the GeoIP database, please download it from its orig
 
 # Requests
 If you have any question, please send us an email! They are in the python files.
+
+# Authors
+
+Sebastian Garcia, eldraco@gmail.com
+Veronica Valeros, vero.valeros@gmail.com
+
+# Acknowledgements
+
+We would like to thank the contributors to the project:
+
+- Gustavo Sorondo
+- Andrew Minion
