@@ -354,7 +354,7 @@ def get_NS_records(domain):
         if output_file!="":
             output_file_handler.writelines('\tChecking NameServers using system default resolver...\n')
         # Get the list of name servers IPs
-        ns_servers = dns.resolver.query(domain, 'NS')
+        ns_servers = dns.resolver.resolve(domain, 'NS')
 
         if debug:
             logging.debug('\t\t> There are {0} nameservers'.format(len(ns_servers)))
@@ -364,9 +364,9 @@ def get_NS_records(domain):
             if debug:
                 logging.debug('\t\t> Looking for {0} IP address'.format(rdata.to_text()))
             # We search for the IP of each NSs
-            ip_list = dns.resolver.query(rdata.to_text()[:-1], 'A')
-            # For each IP we store its information
+            ip_list = dns.resolver.resolve(rdata.to_text()[:-1], 'A')
 
+            # For each IP we store its information
             for ip in ip_list:
                 ip_registry=[]
                 if debug:
@@ -381,6 +381,7 @@ def get_NS_records(domain):
                     # Here we store the hostname in a dictionary. The index is 'HostName'
                     hostname['HostName']=rdata.to_text()[:-1]
                     ip_registry.append(hostname)
+
                     # Here we store the type of register in a dictionary. The index is 'Type'
                     hosttype['Type']='NS'
                     ip_registry.append(hosttype)
@@ -507,10 +508,10 @@ def get_MX_records(domain):
     if output_file!="":
         output_file_handler.writelines('\n\tChecking MailServers using system default resolver...\n')
     try:
-        mail_servers = dns.resolver.query(domain, 'MX')
+        mail_servers = dns.resolver.resolve(domain, 'MX')
         for rdata in mail_servers:
             # We search for the IP of each NSs
-            ip_list = dns.resolver.query(rdata.exchange.to_text()[:-1], 'A')
+            ip_list = dns.resolver.resolve(rdata.exchange.to_text()[:-1], 'A')
             # For each IP we store its information
             for ip in ip_list:
                 ip_registry=[]
@@ -668,7 +669,7 @@ def dns_request(domain):
         # Here we check if wildcard is activated
         #
         try:
-            wildcard_detect = dns.resolver.query('asdf80a98vrnwe9ufrcsajd90awe8ridsjkd.'+domain, 'A')
+            wildcard_detect = dns.resolver.resolve('asdf80a98vrnwe9ufrcsajd90awe8ridsjkd.'+domain, 'A')
             logging.warning('\t\tWARNING!! This domain has wildcards activated for hostnames resolution. We are checking "www" anyway, but perhaps it doesn\'t exists!')
             if output_file!="":
                 output_file_handler.writelines('\t\tWARNING!! This domain has wildcards activated for hostnames resolution. We are checking "www" anyway, but perhaps it doesn\'t exists!\n')
@@ -949,21 +950,20 @@ def check_PTR_record(ip):
         for i in temp_ip:
             reverse_ip=reverse_ip+i+'.'
         reverse_ip=reverse_ip+'in-addr.arpa'
-        reverse_name_result = dns.resolver.query(reverse_ip, 'PTR')
+        reverse_name_result = dns.resolver.resolve(reverse_ip, 'PTR')
 
         for i in reverse_name_result:
             reverse_name=i.to_text()[:-1]
         return reverse_name
 
-
     except Exception as inst:
-        return ""
         print(type(inst))    # the exception instance
         print(inst.args)     # arguments stored in .args
         print(inst)          # __str__ allows args to printed directly
         x, y = inst          # __getitem__ allows args to be unpacked directly
         print('x =', x)
         print('y =', y)
+        return ""
 
 
 
@@ -986,7 +986,7 @@ def check_SPF_record(domain):
             if output_file!="":
                 output_file_handler.writelines('\n\tChecking SPF record...\n')
 
-            temp_spf = dns.resolver.query(domain, 'TXT')
+            temp_spf = dns.resolver.resolve(domain, 'TXT')
 
             # For each spf record...
             for spf_record in temp_spf:
@@ -1135,7 +1135,7 @@ def check_A_records(domain,text=""):
                 # We search host IP
                 if debug:
                     logging.debug('\t> Checking {0} host'.format(common_host),)
-                host_name_ips = dns.resolver.query(common_host+'.'+domain, 'A')
+                host_name_ips = dns.resolver.resolve(common_host+'.'+domain, 'A')
 
 
 
@@ -1147,11 +1147,11 @@ def check_A_records(domain,text=""):
                         # If a host has a NS for its own, then we think its a subdomain
                         if debug:
                             logging.debug('\t\t> Checking if {0} is a subdomain...'.format(common_host),)
-                        host_name_ns = dns.resolver.query(common_host+'.'+domain, 'NS')
+                        host_name_ns = dns.resolver.resolve(common_host+'.'+domain, 'NS')
 
                         # Almost sure it is a new subdomain. Now we confirm it. If it is not a CNAME, then it is really a subdomain and we add it
                         try:
-                            host_name_cname = dns.resolver.query(common_host+'.'+domain, 'CNAME')
+                            host_name_cname = dns.resolver.resolve(common_host+'.'+domain, 'CNAME')
 
                         except:
 
@@ -2070,7 +2070,7 @@ def analyze_domain(domain):
                 # If a host has a NS for its own, then we think its a domain
                 if debug:
                     logging.debug('\t\t> Checking if {0} is a domain...'.format(domain),)
-                host_name_ns = dns.resolver.query(domain, 'NS')
+                host_name_ns = dns.resolver.resolve(domain, 'NS')
             except:
                 logging.error('\tThe given name doesn\'t seem to be a domain since there are no NS servers assigned to it. Stopping.')
                 logging.error('\tThe dnspython library in macos can not find domains such as com. It is a bug in the library. Linux can.\n')
