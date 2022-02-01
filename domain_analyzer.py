@@ -1334,7 +1334,7 @@ def find_and_analyze_random_domains(domain, amount):
 
     try:
         import string
-        import httplib
+        import httplib2
         import urllib2
         import re
         import random
@@ -1514,7 +1514,7 @@ def check_domain_emails(domain):
         return text
     try:
         import string
-        import httplib
+        import httplib2
         import urllib2
         import re
         print(f'\n\tSearching for {domain} emails in Google')
@@ -2178,7 +2178,7 @@ def find_robtex_domains():
     try:
 
         import string
-        import httplib
+        import httplib2
         import urllib2
         import re
         import random
