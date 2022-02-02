@@ -5,7 +5,8 @@ Domain analyzer is a security analysis tool which automatically discovers and re
 
 ## Example default options
 
-[![asciicast](https://asciinema.org/a/j4ScVOOcaKToVZpUcQizooIvq.svg)](https://asciinema.org/a/j4ScVOOcaKToVZpUcQizooIvq)
+![domainanalyzer-gif-demo](https://user-images.githubusercontent.com/2458879/152254361-a923d460-660a-4695-9453-9e7d8142b109.gif)
+*See in asciinema at https://asciinema.org/a/466274*
 
 ## How
 Domain analyzer takes a domain name and finds information about it, such as DNS servers, mail servers, IP addresses, mails on Google, SPF information, etc. After all the information is stored and organized it scans the ports of every IP found using nmap and perform several other security checks. After the ports are found, it uses the tool crawler.py from @verovaleros, to spider the complete web page of all the web ports found. This tool has the option to download files and find open folders.
