@@ -1,0 +1,4 @@
+dnspython
+python-geoip
+httplib
+urllib2
