@@ -1,4 +1,9 @@
 # Domain Analyzer
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/eldraco/domain_analyzer/python2.7)
+![example workflow](https://github.com/eldraco/domain_analyzer/actions/workflows/docker-image.yml/badge.svg)
+![Docker Pulls](https://img.shields.io/docker/pulls/verovaleros/domain_analyzer?color=green)
+[![Branch Maintenance](https://img.shields.io/badge/Branch%20Maintained%3F-no-red.svg)](https://bitbucket.org/lbesson/ansi-colors)
+
 
 ## What
 Domain analyzer is a security analysis tool which automatically discovers and reports information about the given domain. Its main purpose is to analyze domains in an unattended way.
