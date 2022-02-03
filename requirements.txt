@@ -1,4 +1,2 @@
 dnspython
-python-geoip
-httplib
-urllib2
+GeoIP
