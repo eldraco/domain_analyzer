@@ -1,4 +1,5 @@
 # Domain Analyzer
+![example workflow](https://github.com/eldraco/domain_analyzer/actions/workflows/codeql-analysis.yml/badge.svg)
 
 ## What
 Domain analyzer is a security analysis tool which automatically discovers and reports information about the given domain. Its main purpose is to analyze domains in an unattended way.
