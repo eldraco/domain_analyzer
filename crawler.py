@@ -39,8 +39,8 @@
 #     - Implemented a crawl limit with '-d' option. If '-d xx' option is set then we crawl up to xx URLs
 #    - Now accept URL with and without http, Ex.: http://www.site.com and www.site.com
 #    - Identify only emails related to domain
-#    - Fixed bug related with '/' and empty paths 
-# 0.2 
+#    - Fixed bug related with '/' and empty paths
+# 0.2
 #    - Identify simple directory indexing
 #    - Identify directories
 #    - Identify a small group of file extensions
@@ -93,7 +93,7 @@ host_name=""
 url_scheme=""
 link_full_path=""
 
-## VECTORES QUE ALMACENAN LINKS 
+## VECTORES QUE ALMACENAN LINKS
 #NOTA: Hay que revisarlos, estan puestos al ponchazo
 
 # Vector that stores the URLs to crawl. At first the URL passed by user and lately it is fill with URLs found in the pages crawled.
@@ -107,7 +107,7 @@ crawled = []
 # Save directories
 directories = []
 
-# Save directories with indexing 
+# Save directories with indexing
 directories_with_indexing = []
 
 # Save external links
@@ -198,18 +198,18 @@ def usage():
     print "| Author: Veronica Valeros, vero.valeros@gmail.com                     |"
     print "| www.mateslab.com.ar - Argentina                                      |"
     print "+----------------------------------------------------------------------+"
-    print 
+    print
     print "\nUsage: %s <options>" % sys.argv[0]
     print "Options:"
     print "  -u, --url                            URL to start crawling."
     print "  -m, --max-amount-to-crawl           Max deep to crawl. Using breadth first algorithm"
     print "  -w, --write-to-file                  Save summary of crawling to a text file. Output directory is created automatically."
     print "  -s, --subdomains                     Also scan subdomains matching with url domain."
-    print "  -r, --follow-redirect                Do not follow redirect. By default follow redirection at main URL." 
+    print "  -r, --follow-redirect                Do not follow redirect. By default follow redirection at main URL."
     print "  -f, --fetch-files                    Download there every file detected in 'Files' directory. Overwrite existing content."
-    print "  -F, --file-extension                 Download files specified by comma separated extensions. This option also activates 'fetch-files' option. 'Ex.: -F pdf,xls,doc' " 
-    print "  -d, --docs-files                     Download docs files:xls,pdf,doc,docx,txt,odt,gnumeric,csv, etc. This option also activates 'fetch-files' option." 
-    print "  -E, --exclude-extensions             Do not download files that matches with this extensions. Options '-f','-F' or '-d' needed." 
+    print "  -F, --file-extension                 Download files specified by comma separated extensions. This option also activates 'fetch-files' option. 'Ex.: -F pdf,xls,doc' "
+    print "  -d, --docs-files                     Download docs files:xls,pdf,doc,docx,txt,odt,gnumeric,csv, etc. This option also activates 'fetch-files' option."
+    print "  -E, --exclude-extensions             Do not download files that matches with this extensions. Options '-f','-F' or '-d' needed."
     print "  -h, --help                           Show this help message and exit."
     print "  -V, --version                        Output version information and exit."
     print "  -v, --verbose                        Be verbose"
@@ -218,7 +218,7 @@ def usage():
     sys.exit(1)
 
 #################
-# CRAWL EVERY URL 
+# CRAWL EVERY URL
 #################
 def crawl_site(base_url_to_crawl,max_amount_to_crawl):
     """
@@ -228,7 +228,7 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
     site_url    The url to crawl. Ex.: http://www.sitetocrawl.com
     max_amount_to_crawl    The maximum numer of urls to crawl. Integer.
     """
-    
+
     global URL
     global crawled
     global directories
@@ -237,7 +237,7 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
     global link_to_files
     global allfiles
     global emails
-    global crawl_result  
+    global crawl_result
     global main_domain
     global host_name
     global url_scheme
@@ -248,7 +248,7 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
     global accept_domain
     global follow_redirect
     global output_data
-    
+
     # We clean the variables
     URL = []
     directories = []
@@ -265,7 +265,7 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
     link_full_path=""
     url_parsed=""
     url_tmp=""
-    
+
     site_url = base_url_to_crawl
     crawled=[]
 
@@ -276,8 +276,8 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
     output_data['Emails']=[]
     output_data['Directories']=[]
     output_data['DirectoriesWithIndexing']=[]
-    
-    
+
+
     #Program
     try:
         print '\t+ URL to crawl: {0}'.format(site_url)
@@ -291,12 +291,12 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                 site_url=url_scheme+'://'+site_url
             else:
                 url_scheme=url_parsed.scheme
-            
+
             url_parsed=urlparse.urlparse(site_url)
             host_name=url_parsed.netloc
             main_domain=host_name
-            
-            
+
+
             if sub_domains:
                 try:
                     if len(host_name.split('.'))>2:
@@ -307,19 +307,19 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                     accept_domain=host_name
             else:
                 accept_domain=host_name
-            
+
             # We crawl the first URL given by user
             print '\t+ Crawling URL: {0}:'.format(site_url)
             print '\t\t+ Links:',
-        
+
             url_tmp = site_url
             # max_amount_to_crawl defines how many URLs are going to be crawled. By default 5000 is the max.
             # this variable is decremented on each loop
             while max_amount_to_crawl:
-                # We inform in debug mode how many URLs we have crawled and the max amount of URL to crawl 
+                # We inform in debug mode how many URLs we have crawled and the max amount of URL to crawl
                 if debug:
                     print '\n\t\t\t> Crawling URL {0} up to max {1} urls'.format(url_tmp,max_amount_to_crawl),
-            
+
                 # We crawl the url
                 # crawl_url() function populates the variable URL
                 exit_status = crawl_url(url_tmp)
@@ -333,17 +333,17 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                         time.sleep(1.5)
                         pass
                     except KeyboardInterrupt:
-                        break    
+                        break
                 elif exit_status == -3:
                     if debug or max_amount_to_crawl < 2:
-                        print '\n\t\t\t\t> No more URLs to crawl.' 
+                        print '\n\t\t\t\t> No more URLs to crawl.'
                 elif exit_status == -4:
                     print '(File! Not crawling it.)',
                     max_amount_to_crawl=max_amount_to_crawl+1
                 else:
                     if debug:
                         print '\n\t\t\t> URL crawled successfully',
-                
+
                 # We extract next url to crawl
                 try:
                     url_tmp=URL[0]
@@ -391,21 +391,21 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                 emails.sort()
                 directories_with_indexing.sort()
                 link_to_files.sort()
-                
+
 
                 if write_to_file:
                     if debug:
                         print '\n\t\t> Guardando en disco la informacion...'
                     host_name=base_url_to_crawl
                     result = print_to_file()
-                
+
                 print '\n\t+ Crawl finished successfully.'
                 if debug:
                     print '\t\t> Calling Printout() function...'
                 printout()
 
                 base_url_to_crawl=""
-                
+
                 if debug:
                     print '\t\t> Clean exit. Return 1'
 
@@ -415,21 +415,21 @@ def crawl_site(base_url_to_crawl,max_amount_to_crawl):
                 output_data['Emails']=emails
                 output_data['Directories']=directories
                 output_data['DirectoriesWithIndexing']=directories_with_indexing
-                
+
                 return 1
 
         else:
             #printout()
             print '\t> Check if the URL is like "http://xxx.xxxxx.xx". Exiting.'
             return -3
-        
+
     except:
         print '\t\t> Error in crawl site'
         return -4
-        
-    
+
+
 ###########
-# CRAWL URL 
+# CRAWL URL
 ###########
 def crawl_url(url_base):
     """
@@ -452,7 +452,7 @@ def crawl_url(url_base):
     global link_full_path
     global sub_domains
     global error_codes
-    
+
     #Variables
     response=""
     link=""
@@ -478,17 +478,17 @@ def crawl_url(url_base):
     try:
         # Here we extract the complete URL to crawl. Commonly it has the form: http://www.xxxxx.com
         #url_to_crawl = URL[0]
-        url_to_crawl = url_base 
+        url_to_crawl = url_base
         try:
             URL.remove(url_to_crawl)
         except:
             pass
 
         print '\n\t\t\t+ Crawling {0}'.format(url_to_crawl),
-        
+
         # We parse the URL to identify domains and paths of the URL
         url = urlparse.urlparse(url_to_crawl)
-        
+
         # Here we get the data of the URL
         try:
             # Here we set a timeout to limit response time.
@@ -518,7 +518,7 @@ def crawl_url(url_base):
             else:
                 print ' ({0})'.format(error_codes[str(error_code.getcode())]),
                 crawled.append(url_to_crawl + ' (' + error_codes[str(error_code.getcode())] + ')')
-            return -1    
+            return -1
         except urllib2.URLError,error_code:
             if debug:
                 print '\n\t\t\t\t> ({0})'.format(error_code.reason)
@@ -527,17 +527,17 @@ def crawl_url(url_base):
             crawled_url='{0} ({1})'.format(url_to_crawl,error_code.reason)
             if crawled_url not in crawled:
                 crawled.append(crawled_url)
-            return -1    
-        
+            return -1
+
         # We got a response! Reading it and store it in msg
         if debug:
             print '\n\t\t\t\t> Reading response obtained...'
         msg = response.read()
-        
+
         # If you really want to see the response of each link crawled uncomment the following two lines
         #if debug and verbose:
         #    print '\t\t\t\t> Message obatained in response: \n++++++++++++++++++++++\n{0}\n++++++++++++++++++++++\n'.format(msg)
-        
+
         # We look for links in the response message
         links = linkregex.findall(msg)
         if not(links):
@@ -550,7 +550,7 @@ def crawl_url(url_base):
                 print '(REDIRECTING TO: {0})'.format(links[0]),
                 crawled[crawled.index(url_to_crawl)] = url_to_crawl + ' (REDIRECTS TO: ' + links[0] + ')'
                 return 1
-        
+
         # We examine each link found and we add it to crawl if it correspond to the domain that is being crawled
         for link in (links.pop(0) for _ in xrange(len(links))):
             if len(link) > 2:
@@ -562,7 +562,7 @@ def crawl_url(url_base):
                         #if url.path != "" and not url.path.endswith('/'):
                         if url.path != "":
                             if '.' not in url.path:
-                                link_full_path = url_to_crawl 
+                                link_full_path = url_to_crawl
                             else:
                                 link_domain=url_to_crawl.split('/')[1:-1]
                                 link_full_path = url.scheme + '://' + link_domain[1]
@@ -570,7 +570,7 @@ def crawl_url(url_base):
                                     link_full_path = link_full_path + '/' + i
                         else:
                             link_full_path = url.scheme + '://' + url.netloc
-                        
+
                     except:
                         print 'error in setting link path'
                     link=verify_link(link)
@@ -578,14 +578,14 @@ def crawl_url(url_base):
                         continue
                     if debug:
                         print '\t\t\t\t\t> Link absolute path: {0}'.format(link)
-                    
+
                 except:
                     print '\t\t\t\t\t> Function verify_link() is not working'
-                
+
                 # We only add links not found yet
                 if link not in allfiles:
                     allfiles.append(link)
-                
+
                     if link not in crawled:
                         link_domain=urlparse.urlparse(link).netloc
 
@@ -598,7 +598,7 @@ def crawl_url(url_base):
                             accept=False
                             if link_domain == accept_domain:
                                 accept=True
-                            
+
                         if accept:
                             # Here we separate files URLs
                             if not link:
@@ -612,9 +612,9 @@ def crawl_url(url_base):
                                                 print '\t\t\t\t\t>> Found new link to file!: {0}'.format(link)
                                             break
 
-                            # If after analysing the link it is not pointing to file we check it 
+                            # If after analysing the link it is not pointing to file we check it
                             if link not in link_to_files:
-                                # If the link is not already pending to crawl we add it 
+                                # If the link is not already pending to crawl we add it
                                 if link not in URL:
                                     URL.append(link)
                                     if debug:
@@ -636,14 +636,14 @@ def crawl_url(url_base):
             else:
                 if debug:
                     print '\t\t\t\t> Link \'{0}\' does not have enought lenght to be crawled'.format(link)
-                                    
+
 
     except KeyboardInterrupt:
-        return -2    
+        return -2
     except:
-        return -3    
+        return -3
 
-########################        
+########################
 # CLEAN LINK
 ########################
 def verify_link(link):
@@ -658,7 +658,7 @@ def verify_link(link):
     global debug
     global verbose
     global splitters
-    
+
     try:
         if debug:
             print '\t\t\t\t\t> Entering to verify_link function'
@@ -673,13 +673,13 @@ def verify_link(link):
                 break
             except:
                 pass
-    
+
         # Search for mailto references in LINK, check if email belongs to main domain and remove them to add it to crawl list if necessary.
         try:
             email=link.split('mailto:')[1]
             if debug and verbose:
                 print '\t\t\t\t\t> Link have a "mailto:" reference. Email: {0}'.format(email)
-            if (email.find(main_domain)!= -1):    
+            if (email.find(main_domain)!= -1):
                 try:
                     email.split('?')[1]
                     email = email.split('?')[0]
@@ -696,11 +696,11 @@ def verify_link(link):
         link_parsed = urlparse.urlparse(link)
         if link_parsed.scheme:
             return link
-        
+
         #print 'Verifying link. Host Name: {0}, Main Domain: {1}, Url Scheme: {2}'.format(host_name,main_domain,url_scheme)
 
         # We well form the links starting with ../
-        try:    
+        try:
             link = link.split('../')[1]
             #print 'We well form the links starting with ../'
             #link = url_scheme+'://' + host_name + '/' + link
@@ -710,7 +710,7 @@ def verify_link(link):
             return link
         except:
             pass
-        
+
         # We well form the links starting with ./
         try:
             link = link.split('./')[1]
@@ -722,7 +722,7 @@ def verify_link(link):
             return link
         except:
             pass
-        
+
         try:
             if link.startswith('//'):
                 link = link.replace('/','',2)
@@ -731,7 +731,7 @@ def verify_link(link):
                     return -1
                 #link = url_scheme+'://' + host_name + link
                 link = url_scheme+'://' + main_domain + '/' + link
-                return link    
+                return link
             if link.startswith('/'):
                 link = link.replace('/','',1)
                 #print 'We well form the links starting with /'
@@ -743,7 +743,7 @@ def verify_link(link):
                 else:
                     #link = url_scheme+'://' + host_name + '/' + link
                     link = url_scheme+'://' + main_domain + '/' + link
-                return link    
+                return link
         except:
             pass
 
@@ -765,14 +765,14 @@ def verify_link(link):
     except:
         return -1
 
-# IDENTIFY DIRECTORIES 
+# IDENTIFY DIRECTORIES
 #########################
 def identify_directories():
 
     """
     This function prints all the results found while crawling
     """
-    
+
     global main_domain
     global host_name
     global crawled
@@ -783,10 +783,10 @@ def identify_directories():
 
     #Variables
     domain=url_scheme+'://'+host_name
-    
+
     #Programa
     print '\n\t\t+ Searching for directories...'
-    
+
     try:
         for link_url in crawled:
             try:
@@ -798,21 +798,21 @@ def identify_directories():
                     link_url=link_url.split('(')[0]
                 except:
                     pass
-                
+
                 # We store in tmp1 the complete path without domain
                 link_directory_tmp1 = link_url.split(domain)[1]
                 if debug:
                     print '\t\t\t\t> Path extracted form link: {0}'.format(link_directory_tmp1)
-                
-                # We separate the path to stay with last directory in it    
+
+                # We separate the path to stay with last directory in it
                 link_directory_tmp2 = link_directory_tmp1.split('/')[1:-1]
                 link_directory_tmp2.reverse()
-                dir_tmp=""    
-                while len(link_directory_tmp2)>0: 
+                dir_tmp=""
+                while len(link_directory_tmp2)>0:
                     dir_tmp=dir_tmp+link_directory_tmp2.pop()+'/'
                     link_directory = domain+'/'+dir_tmp
                     if link_directory not in directories:
-                        directories.append(link_directory)    
+                        directories.append(link_directory)
                         print '\t\t\t- Found: {0}'.format(link_directory)
             except KeyboardInterrupt:
                 try:
@@ -823,9 +823,9 @@ def identify_directories():
                 except KeyboardInterrupt:
                     return -4
             except:
-                pass    
+                pass
 
-                    
+
         for link_url in link_to_files:
             try:
                 if debug:
@@ -835,18 +835,18 @@ def identify_directories():
                 link_directory_tmp1 = link_url.split(domain)[1]
                 if debug:
                     print '\t\t\t\t> Path extracted form link: {0}'.format(link_directory_tmp1)
-                
-                # We separate the path to stay with last directory in it    
+
+                # We separate the path to stay with last directory in it
                 link_directory_tmp2 = link_directory_tmp1.split('/')[1:-1]
                 link_directory_tmp2.reverse()
-                dir_tmp=""    
-                while len(link_directory_tmp2)>0: 
+                dir_tmp=""
+                while len(link_directory_tmp2)>0:
                     dir_tmp=dir_tmp+link_directory_tmp2.pop()+'/'
                     link_directory = domain+'/'+dir_tmp
                     if link_directory not in directories:
-                        directories.append(link_directory)    
+                        directories.append(link_directory)
                         print '\t\t\t- Found: {0}'.format(link_directory)
-                    
+
             except KeyboardInterrupt:
                 try:
                     print '\t\t\t\t> Keyboard interrupt while iterating crawled vector. Waiting 1 seconds to continue.'
@@ -882,7 +882,7 @@ def directory_indexing():
     global crawl_results
     global URL
     global host_name
-    global main_domain 
+    global main_domain
     global error_codes
 
     #Variables
@@ -890,7 +890,7 @@ def directory_indexing():
     dir_msg=""
     URL=[]
     directory=""
-    #Programa 
+    #Programa
 
     try:
         # First we identify directories on site already crawled
@@ -908,11 +908,11 @@ def directory_indexing():
             try:
                 if directory not in directories_with_indexing:
                     print '\n\t\t\t- {0}'.format(directory),
-                    if debug: 
+                    if debug:
                         print '\n\t\t\t\t> Directory to analyze: {0}'.format(directory)
                     dir_response = urllib2.urlopen(directory.replace(' ','%20'))
                     dir_msg = dir_response.read()
-                
+
                     if 'Index of' in dir_msg:
                         print '\n\t\t\t>>> Directory indexing at: {0}'.format(directory),
                         directories_with_indexing.append(directory)
@@ -926,7 +926,7 @@ def directory_indexing():
                         dir_tmp = directory+' (No open folder)'
                         directories[directories.index(directory)] = dir_tmp
                         print ' (No Open Folder)',
-                
+
             except urllib2.HTTPError,error_code:
                 code=error_codes[str(error_code.getcode())]
                 print '({0})'.format(code),
@@ -954,7 +954,7 @@ def directory_indexing():
 
         main_domain_tmp = main_domain
         host_name_tmp = host_name
-        if directories_with_indexing.__len__() > 0:    
+        if directories_with_indexing.__len__() > 0:
             print '\n\t\t+ Crawling directories with indexing:',
             for dir_tmp in directories_with_indexing:
                 URL=[]
@@ -962,7 +962,7 @@ def directory_indexing():
                 dir_tmp_parsed = urlparse.urlparse(dir_tmp)
                 main_domain = dir_tmp_parsed.netloc
                 host_name = dir_tmp_parsed.netloc + dir_tmp_parsed.path
-                
+
                 result_crawl = crawl_url(dir_tmp)
 
             main_domain = main_domain_tmp
@@ -978,7 +978,7 @@ def directory_indexing():
 
 
 #############
-# FETCH FILES 
+# FETCH FILES
 #############
 def fetch_files():
 
@@ -989,7 +989,7 @@ def fetch_files():
 
     global main_domain
     global link_to_files
-    #global extensions_for_download 
+    #global extensions_for_download
 
     try:
         print '\n\t\t+ Fetching found files:'
@@ -1017,7 +1017,7 @@ def fetch_files():
                 try:
                     if 'Files' in output_directory:
                         os.mkdir(output_directory)
-                    else: 
+                    else:
                         output_directory = output_directory+'/Files/'
                         os.mkdir(output_directory)
                 except OSError,error:
@@ -1025,7 +1025,7 @@ def fetch_files():
                         print '\t\t> Output directory already exists! Overwriting content!'
                     else:
                         print '\t\t\t\t> Cannot create output directory! Not downloading files:'
-                        return -15 
+                        return -15
 
         print '\t\t\t- Files stored in: {0}'.format(output_directory)
         if verbose:
@@ -1065,18 +1065,18 @@ def fetch_files():
 # FETCH FILE
 ############
 def fetch_file(url_to_fetch,directory):
-    
+
     """
     This function fetchs a single file from a given URL
     """
-    
+
     global error_codes
 
 
     try:
         socket.setdefaulttimeout(50)
         web_file = urllib2.urlopen(url_to_fetch.replace(' ','%20'))
-        
+
         try:
             local_file = directory+url_to_fetch.split('/')[-1]
             local_file = open(directory+url_to_fetch.split('/')[-1], 'w')
@@ -1093,7 +1093,7 @@ def fetch_file(url_to_fetch,directory):
             print '\t\t\t\t> ({0})'.format(error_codes[str(error_code.getcode())])
         except:
             print '\t\t\t\t> Error in requesting file'
-        return -10    
+        return -10
     except urllib2.URLError,error_code:
         if debug:
             print '\t\t\t\t> ({0})'.format(error_code.reason)
@@ -1102,7 +1102,7 @@ def fetch_file(url_to_fetch,directory):
     except KeyboardInterrupt:
         return -11
     except:
-        return -12    
+        return -12
 
 ##########
 # PRINTOUT
@@ -1112,7 +1112,7 @@ def printout():
     """
     This function prints all the results found while crawling
     """
-    
+
     global crawled
     global link_to_files
     global externals
@@ -1130,8 +1130,8 @@ def printout():
         print '----------------------------------------------------------------------'
         print 'Summary of ' + url_scheme + '://' + host_name
         print '----------------------------------------------------------------------'
-        
-        
+
+
         count=0
         print '+ Links crawled:'
         for i in crawled:
@@ -1152,8 +1152,8 @@ def printout():
             print '\t- {0}'.format(i)
             count=count+1
         print '\tTotal external links: {0}'.format(count)
-        
-        
+
+
         """
         count=0
         print '\n+ All files found:'
@@ -1170,7 +1170,7 @@ def printout():
             count=count+1
         print '\tTotal email address found: {0}'.format(count)
 
-        
+
         #Printing directories found
         count=0
         print '\n+ Directories found:'
@@ -1178,7 +1178,7 @@ def printout():
             print '\t- {0}'.format(i)
             count=count+1
         print '\tTotal directories: {0}'.format(count)
-            
+
 
         #Printing directories with indexing activated
         count=0
@@ -1187,7 +1187,7 @@ def printout():
             print '\t- {0}'.format(i)
             count=count+1
         print '\tTotal directories with indexing: {0}'.format(count)
-        
+
         print '\n----------------------------------------------------------------------\n'
         return 1
 
@@ -1205,7 +1205,7 @@ def print_to_file():
     """
     This function prints all the results found while crawling
     """
-    
+
     global crawled
     global link_to_files
     global externals
@@ -1234,11 +1234,11 @@ def print_to_file():
             pass
 
 
-        if debug: 
+        if debug:
             print 'Output directory has been set: {0}'.format(output_directory)
 
         try:
-            if debug: 
+            if debug:
                 print 'Creating output directory...'
             os.mkdir(output_directory)
         except OSError,error:
@@ -1248,15 +1248,15 @@ def print_to_file():
                 pass
             else:
                 print '\t\t\t\t> Cannot create output directory! Not downloading files:'
-                return -15 
-        
+                return -15
+
         # temp is the file name of the summary outout
         temp=host_name
         temp = temp.replace('http://','')
         temp = temp.replace('/','_')
-        if debug: 
+        if debug:
             print 'Saving file as: {0}/crawler_{1}'.format(output_directory,temp)
-        f=open(output_directory+'/crawler_'+temp,'w')        
+        f=open(output_directory+'/crawler_'+temp,'w')
         f.writelines('--------------------------------------------------------------------\n')
         f.writelines('Sumary information of crawling site '+host_name+'\n')
         f.writelines('--------------------------------------------------------------------\n')
@@ -1281,8 +1281,8 @@ def print_to_file():
             f.writelines('\n\t- '+i)
             count=count+1
         f.writelines('\n\tTotal external links: '+str(count)+'\n')
-        
-        
+
+
         #Printing mails found
         count=0
         f.writelines('\n+ Email addresses found:')
@@ -1291,7 +1291,7 @@ def print_to_file():
             count=count+1
         f.writelines('\n\tTotal email address found: '+str(count)+'\n')
 
-        
+
         #Printing directories found
         count=0
         f.writelines('\n+ Directories found:')
@@ -1299,7 +1299,7 @@ def print_to_file():
             f.writelines('\n\t- '+i)
             count=count+1
         f.writelines('\n\tTotal directories: '+str(count)+'\n')
-            
+
 
         #Printing directories with indexing activated
         count=0
@@ -1339,11 +1339,11 @@ def main():
         exclude_extensions=""
         # By default we crawl a max of 5000 distinct URLs
         max_amount_to_crawl=5000
-        result =0    
+        result =0
         opts, args = getopt.getopt(sys.argv[1:], "hVDu:m:vwfsr[F:]d[E:]", ["help","version","debug","url=","deep=","verbose","write-to-file","fetch-files","subdomains",'follow-redirect','file-extension','docs-files','exclude-extensions'])
 
 
-    except getopt.GetoptError: usage()    
+    except getopt.GetoptError: usage()
 
     for opt, arg in opts:
         if opt in ("-h", "--help"): usage()
@@ -1358,7 +1358,7 @@ def main():
         if opt in ("-r", "--follow-redirect"): follow_redirect=False
         if opt in ("-F", "--file-extension"): fetch_files_opt=True; extensions=arg
         if opt in ("-E", "--exclude-extensions"): exclude_extensions=arg;
-    
+
         if opt in ("-d", "--docs-files"):fetch_files_opt=True; extensions="doc,ppt,pps,xls,docx,pptx,ppsx,xlsx,sxw,sxc,sxi,odt,ods,odg,odp,pdf,wpd,txt,gnumeric,csv"
 
     try:
@@ -1382,13 +1382,13 @@ def main():
                         extensions_for_download.remove(i.lower())
                         extensions_for_download.remove(i.upper())
 
-            
+
             # We decrement the value by 1 because we count the 0
             result = crawl_site(base_url,int(max_amount_to_crawl))
 
             if result == -1:
                 if follow_redirect and crawled:
-                    redirect = crawled[0] 
+                    redirect = crawled[0]
                     if not redirect.split(' ')[-1].split(')')[0].startswith('http://'):
                         redirect_link = redirect.split(' ')[0] + '/' + redirect.split(' ')[-1].split(')')[0]
                     else:
@@ -1406,7 +1406,7 @@ def main():
             #    print 'Problems with the URL. Checkit.'
         else:
             usage()
-        
+
     except KeyboardInterrupt:
         # CTRL-C pretty handling
         print 'Keyboard Interruption!. Exiting.'
