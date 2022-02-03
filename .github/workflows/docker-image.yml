@@ -27,4 +27,4 @@ jobs:
 
     - name: Docker Push
       run: |
-        docker push ${{secrets.DOCKER_USER}}/domain_analyzer/python2.7
+        docker push ${{secrets.DOCKER_USER}}/domain_analyzer:0.8_python2.7
