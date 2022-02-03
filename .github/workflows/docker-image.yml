@@ -23,8 +23,7 @@ jobs:
 
     - name: Build the Docker image
       run: |
-        docker build . --file Dockerfile --tag domain_analyzer/python2.7:$(date +%s)
-
+        docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/domain_analyzer:python2.7
     - name: Docker Push
       run: |
-        docker push ${{secrets.DOCKER_USER}}/domain_analyzer:0.8_python2.7
+        docker push ${{secrets.DOCKER_USER}}/domain_analyzer:python2.7
