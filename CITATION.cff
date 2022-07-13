@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: >-
+  Domain Analyzer: Analyze the security of any domain by finding all the information possible.
+message: 'If you use this software, please cite it as below.'
+type: software
+authors:
+  - given-names: Sebastian
+    family-names: Garcia
+    email: sebastian.garcia@agents.fel.cvut.cz
+    affiliation: >-
+      Stratosphere Laboratory, AIC, FEL, Czech
+      Technical University in Prague
+    orcid: 'https://orcid.org/0000-0001-6238-9910'
+  - given-names: Veronica
+    family-names: Valeros
+    email: valerver@fel.cvut.cz
+    affiliation: >-
+      Stratosphere Laboratory, AIC, FEL, Czech
+      Technical University in Prague
+    orcid: 'https://orcid.org/0000-0003-2554-3231'
