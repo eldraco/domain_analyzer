@@ -14,29 +14,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
     - name: Docker Login
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Docker meta
-      id: docker_meta
-      uses: docker/metadata-action@v4
-      with:
-        images: |
-          ${{ secrets.DOCKER_USER }}/domain_analyzer
-        flavor: |
-          prefix=python2.7-,onlatest=true
-        tags: |
-          prefix=python2.7-,type=sha
-    - name: Build and push
-      id: docker_build
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        file: Dockerfile
-        tags: ${{ steps.docker_meta.outputs.tags }}
-        labels: ${{ steps.docker_meta.outputs.labels }}
-        push: true
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: |
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - name: Build the Docker image
+      run: |
+        docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/domain_analyzer:python2.7
+    - name: Docker Push
+      run: |
+        docker push ${{secrets.DOCKER_USER}}/domain_analyzer:python2.7
