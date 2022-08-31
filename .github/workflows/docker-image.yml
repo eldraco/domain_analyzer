@@ -30,7 +30,7 @@ jobs:
         flavor: |
           prefix=python2.7-,onlatest=true
         tags: |
-          type=sha
+          prefix=python2.7-,type=sha
     - name: Build and push
       id: docker_build
       uses: docker/build-push-action@v2
