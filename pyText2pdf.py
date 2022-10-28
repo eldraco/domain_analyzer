@@ -234,15 +234,15 @@ class PyText2Pdf(object):
         if outfile: self._ofile = outfile
         
         if self._landscape:
-            print 'Landscape option on...'
+            print('Landscape option on...')
         if self._columns==2:
-            print 'Printing in two columns...'
+            print('Printing in two columns...')
         if self._doFFs:
-            print 'Ignoring form feed character...'
+            print('Ignoring form feed character...')
         if self._IsoEnc:
-            print 'Using ISO Latin Encoding...'
+            print('Using ISO Latin Encoding...')
 
-        print 'Using font',self._font[1:],'size =', self._ptSize
+        print('Using font',self._font[1:],'size =', self._ptSize)
 
     def writestr(self, str):
         """ Write string to output file descriptor.
@@ -256,8 +256,8 @@ class PyText2Pdf(object):
                 self._fpos += LF_EXTRA
         try:
             self._ofs.write(str)
-        except IOError, e:
-            print e
+        except IOError as e:
+            print(e)
             return -1
 
         return 0
@@ -278,8 +278,9 @@ class PyText2Pdf(object):
         
         try:
             self._ifs=open(self._ifile)
-        except IOError, (strerror, errno):
-            print 'Error: Could not open file to read --->', self._ifile
+        except IOError as xxx_todo_changeme:
+            (strerror, errno) = xxx_todo_changeme.args
+            print('Error: Could not open file to read --->', self._ifile)
             sys.exit(3)
 
         if self._ofile=="":
@@ -287,17 +288,18 @@ class PyText2Pdf(object):
 
         try:
             self._ofs = open(self._ofile, 'wb')
-        except IOError, (strerror, errno):
-            print 'Error: Could not open file to write --->', self._ofile
+        except IOError as xxx_todo_changeme1:
+            (strerror, errno) = xxx_todo_changeme1.args
+            print('Error: Could not open file to write --->', self._ofile)
             sys.exit(3)
 
-        print 'Input file=>',self._ifile
-        print 'Writing pdf file',self._ofile, '...'
+        print('Input file=>',self._ifile)
+        print('Writing pdf file',self._ofile, '...')
         self.writeheader()
         self.writepages()
         self.writerest()
 
-        print 'Wrote file', self._ofile
+        print('Wrote file', self._ofile)
         self._ifs.close()
         self._ofs.close()
         return 0

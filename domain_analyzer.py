@@ -704,9 +704,9 @@ def dns_request(domain):
                 for ip in name_servers_list:
                     try:
                         zone_transfer_data = dns.zone.from_xfr(dns.query.xfr(ip, domain,timeout=-1))
-                        logging.critical('\t\tZone transfer successful on name server {0} ({1} hosts)'.format(ip, len(zone_transfer_data.items())))
+                        logging.critical('\t\tZone transfer successful on name server {0} ({1} hosts)'.format(ip, len(list(zone_transfer_data.items()))))
                         if output_file!="":
-                            output_file_handler.writelines('\t\tZone transfer successful on name server {0} ({1} hosts)\n'.format(ip, len(zone_transfer_data.items())))
+                            output_file_handler.writelines('\t\tZone transfer successful on name server {0} ({1} hosts)\n'.format(ip, len(list(zone_transfer_data.items()))))
                         # We should store this information in OS info or something...
                         ip_registry=[]
                         hosttype={}
@@ -719,7 +719,7 @@ def dns_request(domain):
                             hosttype['ZT']=len(zone_transfer_data.items())
                             ip_registry.append(hosttype)
                             if debug:
-                                logging.debug('\t\t> Storing ZT data for {0} : {1} hostnames: {2}'.format(ip,len(zone_transfer_data.items()),zone_transfer_data.keys()))
+                                logging.debug('\t\t> Storing ZT data for {0} : {1} hostnames: {2}'.format(ip,len(list(zone_transfer_data.items())), zone_transfer_data.keys()))
                             # We store it in the main dictionary
                             a=[]
                             a=copy.deepcopy(ip_registry)
@@ -1394,7 +1394,7 @@ def find_and_analyze_random_domains(domain, amount):
 
 
                 # For every domain found, verify it.
-                for uniq_domains_web in domain_dict.keys():
+                for uniq_domains_web in list(domain_dict.keys()):
                     if 'http://' in uniq_domains_web:
                         temp=uniq_domains_web
                         uniq_domains_web=temp[temp.index('http://')+7:]
@@ -1436,7 +1436,7 @@ def find_and_analyze_random_domains(domain, amount):
 
 
                 # How much domains we got?
-                counter=len(final_dict.keys())
+                counter=len(list(final_dict.keys()))
 
                 logging.info('\tWe found these domains in this first search:')
                 if output_file!="":
@@ -1528,7 +1528,7 @@ def check_domain_emails(domain):
                 emails = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
                 for email in emails:
                     d[email]=1
-                    uniq_emails=d.keys()
+                    uniq_emails = list(d.keys())
                 page_counter = page_counter + 10
         except IOError:
             logging.debug("\t> Can't connect to Google Groups!"+"")
@@ -1543,11 +1543,11 @@ def check_domain_emails(domain):
                 emails_web = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
                 for email_web in emails_web:
                     d[email_web]=1
-                    uniq_emails_web=d.keys()
+                    uniq_emails_web = list(d.keys())
                 page_counter_web = page_counter_web + 10
         except IOError:
             logging.debug("\t> Can't connect to Google Web!"+"")
-        for uniq_emails_web in d.keys():
+        for uniq_emails_web in list(d.keys()):
             # Just adds a warning if the emails is more thatn 20 characters long. Not in the original goog-mail.py
             if len(uniq_emails_web.split('@')[0]) >= 20:
                 uniq_emails_web_temp=uniq_emails_web
@@ -1606,13 +1606,13 @@ def check_active_host():
             reason=""
             # If any of the host names has the 'ignored' pattern, do not check it!
             if ignore_host_pattern:
-                for dict in ip_registry:
-                    for i in dict.keys():
+                for ip_dict in ip_registry:
+                    for i in list(ip_dict.keys()):
                         if i == 'HostName':
                             for pattern in ignore_host_pattern.split(','):
-                                if pattern in dict['HostName']:
+                                if pattern in ip_dict['HostName']:
                                     ignore=True
-                                    print(f'\t\tPattern: {pattern}, Hostname: {dict["HostName"]}. Ignoring!')
+                                    print(f'\t\tPattern: {pattern}, Hostname: {ip_dict["HostName"]}. Ignoring!')
                                     break
             if not ignore:
                 # If no output directory was selected, do not store nmap output
@@ -1954,7 +1954,7 @@ def printout(domain,ip,option):
                         logging.critical('\t\t\tOpen Folders: {0}'.format(dicts.get('DirIndex')))
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tOpen Folders: {0}\n'.format(dicts.get('DirIndex')))
-            print
+            print()
             logging.info('--------------End Summary --------------')
             logging.info('-----------------------------------------')
             if output_directory!=False:
@@ -2072,7 +2072,7 @@ def analyze_domain(domain):
                 logging.error('\tThe dnspython library in macos can not find domains such as com. It is a bug in the library. Linux can.\n')
                 return -1
             # Now we are sure its a domain!
-            print
+            print()
             logging.debug('Analyzing domain: {0}'.format(domain))
             # If an output directory was selected, we create an output file...
             if output_directory!=False:
@@ -2138,7 +2138,7 @@ def analyze_domain(domain):
                     logging.warning('Are you sure do you want to send an email with the report to every email address found in the domain??? ( No / Yes, I want )')
                     if output_file!="":
                         output_file_handler.writelines('Are you sure do you want to send an email with the report to every email address found in the domain??? ( No / Yes, I want )\n')
-                    text2 = raw_input()
+                    text2 = input()
                     if text2 == 'Yes, I want':
                         robin_hood_send()
                     else:
@@ -2452,7 +2452,7 @@ def web_crawl_domain():
                                     #
                                     # Here we crawl!!!
                                     #
-                                    print
+                                    print()
                                     crawler.crawl_result=[]
                                     crawler.crawl_site(temp_host_name,max_amount_to_crawl)
 
@@ -2469,7 +2469,7 @@ def web_crawl_domain():
                                     #
                                     # Here we crawl!!!
                                     #
-                                    print
+                                    print()
                                     crawler.crawl_result=[]
                                     crawler.crawl_site(temp_host_name,max_amount_to_crawl)
 
@@ -2676,7 +2676,7 @@ def main():
                 domains_still_to_analyze.append(domain)
                 # For every domain found, we analyze them
                 for unrelated_domain in domains_still_to_analyze:
-                    print
+                    print()
                     logging.info('Domains still to check: {0}'.format(len(domains_still_to_analyze)))
                     # Analyze the main domain
                     analyze_domain(unrelated_domain)
@@ -2685,7 +2685,7 @@ def main():
             # Now we will analyze each subdomain found
             if not_subdomains == False:
                 for subdomain in subdomains_found:
-                    print
+                    print()
                     analyze_domain(subdomain)
         # WORLD DOMINATION!!!!
         # We don't recomend to use world-domination and robin-hood at the same time...
