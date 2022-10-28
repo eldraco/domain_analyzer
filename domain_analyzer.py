@@ -1333,9 +1333,7 @@ def find_and_analyze_random_domains(domain, amount):
     global output_file_handler
 
     try:
-        import string
-        import httplib2
-        import urllib2
+        from  urllib import request
         import re
         import random
         domain_dict={}
@@ -1363,9 +1361,9 @@ def find_and_analyze_random_domains(domain, amount):
             page_counter_web = random.randrange(1,100,10)
             try:
                 results_web = 'http://www.google.com/search?q=inurl%3a'+str(domain)+'&hl=en&btnG=Search&aq=f&start='+ repr(page_counter_web) + '&sa=N'
-                request_web = urllib2.Request(results_web)
+                request_web = request.Request(results_web)
                 request_web.add_header('User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
-                opener_web = urllib2.build_opener()
+                opener_web = request.build_opener()
                 text = opener_web.open(request_web).read()
 
                 # This re extracts the domains
@@ -1513,9 +1511,7 @@ def check_domain_emails(domain):
                     finished = 0
         return text
     try:
-        import string
-        import httplib2
-        import urllib2
+        from urllib import request
         import re
         print(f'\n\tSearching for {domain} emails in Google')
         if output_file!="":
@@ -1525,10 +1521,10 @@ def check_domain_emails(domain):
         try:
             while page_counter < 50 :
                 results = 'http://groups.google.com/groups?q='+str(domain)+'&hl=en&lr=&ie=UTF-8&start=' + repr(page_counter) + '&sa=N'
-                request = urllib2.Request(results)
-                request.add_header('User-Agent','Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)')
-                opener = urllib2.build_opener()
-                text = opener.open(request).read()
+                request_groups = request.Request(bytes(results, encoding='utf-8'))
+                request_groups.add_header(b'User-Agent','Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)')
+                opener = request.build_opener()
+                text = opener.open(request_groups).read()
                 emails = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
                 for email in emails:
                     d[email]=1
@@ -1540,9 +1536,9 @@ def check_domain_emails(domain):
         try:
             while page_counter_web < 50 :
                 results_web = 'http://www.google.com/search?q=%40'+str(domain)+'&hl=en&lr=&ie=UTF-8&start='+ repr(page_counter_web) + '&sa=N'
-                request_web = urllib2.Request(results_web)
-                request_web.add_header('User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
-                opener_web = urllib2.build_opener()
+                request_web = request.Request(bytes(results_web, encoding='utf-8'))
+                request_web.add_header(b'User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
+                opener_web = request.build_opener()
                 text = opener_web.open(request_web).read()
                 emails_web = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
                 for email_web in emails_web:
@@ -1630,7 +1626,7 @@ def check_active_host():
                     nmap_command_temp = 'nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sn'
                 nmap_command=shlex.split(nmap_command_temp)
                 nmap_result=Popen(nmap_command, stdout=PIPE).communicate()[0]
-                if nmap_result.find('Host is up, received')!=-1:
+                if nmap_result.find(b'Host is up, received')!=-1:
                     reason=nmap_result.split('received ')[1].split(' (')[0]
                     hostup['HostUp']='True ('+reason+')'
                     ip_registry.append(hostup)
@@ -2177,11 +2173,8 @@ def find_robtex_domains():
     global robtex_domains
     try:
 
-        import string
-        import httplib2
-        import urllib2
+        from urllib import request
         import re
-        import random
 
         # This is not working: domain_analyzer_v0.5.py -d law.edu.ru -o law.edu.ru -b -a -n -g -v "in-addr.arpa" -D
 
@@ -2229,9 +2222,9 @@ def find_robtex_domains():
 
                 # For each DNS server ask robtex unrelated domains with the same DNS
                 results_web = 'http://www.robtex.com/dns/'+ hostname +'.html'
-                request_web = urllib2.Request(results_web)
-                request_web.add_header('User-Agent','Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.205 Safari/534.16')
-                opener_web = urllib2.build_opener()
+                request_web = request.Request(bytes(results_web, encoding='utf-8'))
+                request_web.add_header(b'User-Agent','Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.205 Safari/534.16')
+                opener_web = request.build_opener()
                 try:
                     text = opener_web.open(request_web).read()
                 except:
