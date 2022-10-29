@@ -130,3 +130,14 @@ If you have any issues with the GeoIP database, please download it from its orig
 
 # Requests
 If you have any question, please send us an email! They are in the python files.
+
+# Tofix
+
+sudo ./domain_analyzer.py -d cr -k 5 -s -g -p -a
+    Finding 5 pseudo-random sub-domains to analyze in the cr. domain.
+<class 'urllib2.HTTPError'>
+()
+HTTP Error 503: Service Unavailable
+<class 'urllib2.HTTPError'>
+()
+
