@@ -1,10 +1,13 @@
 # Domain Analyzer
+![example workflow](https://github.com/eldraco/domain_analyzer/actions/workflows/codeql-analysis.yml/badge.svg)
 
 ## What
 Domain analyzer is a security analysis tool which automatically discovers and reports information about the given domain. Its main purpose is to analyze domains in an unattended way.
 
 ## Example default options
-![Default Options](https://github.com/eldraco/domain_analyzer/raw/master/videos/domain_analyzer-example-default_com.ar.gif)
+
+![domainanalyzer-gif-demo](https://user-images.githubusercontent.com/2458879/152254361-a923d460-660a-4695-9453-9e7d8142b109.gif)
+*See in asciinema at https://asciinema.org/a/466274*
 
 ## How
 Domain analyzer takes a domain name and finds information about it, such as DNS servers, mail servers, IP addresses, mails on Google, SPF information, etc. After all the information is stored and organized it scans the ports of every IP found using nmap and perform several other security checks. After the ports are found, it uses the tool crawler.py from @verovaleros, to spider the complete web page of all the web ports found. This tool has the option to download files and find open folders.
@@ -101,22 +104,6 @@ Current version is 0.8 and the main features are:
 
 Most of these features can be deactivated.
 
-## Screenshots
-
-1. Example domain_analyzer.py -d .gov -k 10 -b
-![Basic Operation](images/screenshot1.png "Search random domains in a TLD, add the zone Transfer hosts.")
-
-
-# History
-Domain analyzer was born on Feb 4th, 2011. You can check the original repository in source forge [here](https://sourceforge.net/projects/domainanalyzer/)
-
-
-## Changelog
-
-- 0.8
-	We can check for hostnames read from an external file. Thanks to Gustavo Sorondo for the code! (iampuky@gmail.com)
-
-
 ## Installation
 Just untar the .tar.gz file and copy the python files to the /usr/bin/ directory. Domain_analyzer needs to be run as root. The crawler can be run as a non-privileged user.
 If you want all the features (web crawler, pdf and colors), which is nice, also copy these files to /usr/bin or /usr/local/bin
@@ -127,6 +114,26 @@ If you want all the features (web crawler, pdf and colors), which is nice, also 
 
 If you have any issues with the GeoIP database, please download it from its original source [here](http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz). And install it in where your system needs it, usually at /opt/local/share/GeoIP/GeoIP.dat
 
+## Docker Image
+
+We are migrating the tool to run on Python 3, however, until a new version is released, we have created a docker image that can be used to run domain analyzer on Python 2.7, and has all the dependencies already installed.
+
+`docker run --rm -it verovaleros/domain_analyzer:python2.7 /domain_analyzer/domain_analyzer.py -d <domain>`
+
+## Screenshots
+
+1. Example domain_analyzer.py -d .gov -k 10 -b
+![Basic Operation](images/screenshot1.png "Search random domains in a TLD, add the zone Transfer hosts.")
+
+
+# History
+Domain analyzer was born on Feb 4th, 2011. You can check the original repository in source forge [here](https://sourceforge.net/projects/domainanalyzer/)
+
+
+# Changelog
+
+- 0.8
+	We can check for hostnames read from an external file. Thanks to Gustavo Sorondo for the code! (iampuky@gmail.com)
 
 # Requests
 If you have any question, please send us an email! They are in the python files.
