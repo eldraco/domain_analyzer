@@ -112,7 +112,7 @@
 from subprocess import Popen
 from subprocess import PIPE
 from subprocess import call
-from ansistrm import *
+from ansistrm import ColorizingStreamHandler, logging
 import socket
 import os, sys
 import getopt
@@ -126,6 +126,7 @@ import dns.zone
 import copy
 import shlex
 import time
+from geoip import geolite2
 
 ####################
 # Global Variables
@@ -219,7 +220,6 @@ world_domination=False
 
 # By default resolve country names
 countrys=True
-geoip_cache=""
 
 colors=True
 
@@ -334,7 +334,6 @@ def get_NS_records(domain):
     global not_store_nmap
     global subdomains_found
     global not_subdomains
-    global geoip_cache
     global output_file_handler
     global countrys
 
@@ -492,7 +491,6 @@ def get_MX_records(domain):
     global not_store_nmap
     global subdomains_found
     global not_subdomains
-    global geoip_cache
     global output_file_handler
     global countrys
 
@@ -540,11 +538,10 @@ def get_MX_records(domain):
                         if debug:
                             logging.debug('\t\t> No country yet')
                         ipcountry={}
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
-                        if debug:
-                            logging.debug('\t\t> Country: {0}'.format(country))
+                        logging.info('\t\t> Country: {0}'.format(country))
 
                     # Obtain Ip's reverse DNS name if we don't have it
                     has_ptr=False
@@ -575,11 +572,11 @@ def get_MX_records(domain):
 
                     if countrys:
                         # Do we have the country of this ip?
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
                         if debug:
-                            logging.debug('\t\t> Country: {0}'.format(country))
+                            logging.info('\t\t> Country: {0}'.format(country))
 
                     # Here we store the hostname in a dictionary. The index is 'HostName'
                     hostname['HostName']=rdata.exchange.to_text()[:-1]
@@ -629,7 +626,6 @@ def dns_request(domain):
     global subdomains_found
     global not_subdomains
     global common_hostnames
-    global geoip_cache
     global output_file_handler
     global countrys
 
@@ -847,11 +843,10 @@ def dns_request(domain):
                                         if debug:
                                             logging.debug('\t\t> No country yet')
                                         ipcountry={}
-                                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                                        country=geolite2.lookup(ip.to_text()).country
                                         ipcountry['IpCountry']=country
                                         ip_registry.append(ipcountry)
-                                        if debug:
-                                            logging.debug('\t\t> Country: {0}'.format(country))
+                                        logging.info('\t\t> Country: {0}'.format(country))
 
                                     # Obtain Ip's reverse DNS name if we don't have it
                                     has_ptr=False
@@ -885,7 +880,7 @@ def dns_request(domain):
 
                                     if countrys:
                                         # Do we have the country of this ip?
-                                        country=geoip_cache.country_name_by_addr(ip)
+                                        country=geolite2.lookup(ip).country
                                         ipcountry['IpCountry']=country
                                         ip_registry.append(ipcountry)
 
@@ -1275,7 +1270,7 @@ def check_A_records(domain,text=""):
 
                     if countrys:
                         # Search the country of the IP
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
 
@@ -2663,11 +2658,10 @@ def main():
             # Do we have GeoIP?? CHECK IT WITHOUT COUNTRYS
             if countrys:
                 try:
-                    import GeoIP
-                    geoip_cache = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
+                    country=geolite2.lookup('1.1.1.1').country
                 except:
                     countrys=False
-                    logging.warning('\tWARNING!! You don\'t have GeoIP libraries. apt-get install python-geoip\n\n')
+                    logging.warning('\tWARNING!! You don\'t have GeoIP libraries. Install python-geoip-python3 and python-geoip-geolite2\n\n')
             # If selected, find N random domains and analyze them
             if amount_of_random_domains:
                 domain_list = find_and_analyze_random_domains(domain, amount_of_random_domains)
@@ -2712,12 +2706,10 @@ def main():
                 # Do we have GeoIP??
                 if countrys:
                     try:
-                        import GeoIP
-                        geoip_cache = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
-
+                        country=geolite2.lookup('1.1.1.1').country
                     except:
                         countrys=False
-                        logging.warning('\tWARNING! You don\'t have GeoIP libraries. apt-get install python-geoip')
+                        logging.warning('\tWARNING!! You don\'t have GeoIP libraries. Install python-geoip-python3 and python-geoip-geolite2\n\n')
 
                 # HERE
                 world_domination_check()
