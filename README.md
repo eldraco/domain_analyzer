@@ -1,6 +1,6 @@
 # Domain Analyzer v0.8.3
 
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/eldraco/domain_analyzer/python3.9)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/eldraco/domain_analyzer)
 ![example workflow](https://github.com/eldraco/domain_analyzer/actions/workflows/docker-image.yml/badge.svg)
 ![example workflow](https://github.com/eldraco/domain_analyzer/actions/workflows/codeql-analysis.yml/badge.svg)
 ![Docker Pulls](https://img.shields.io/docker/pulls/verovaleros/domain_analyzer?color=green)
