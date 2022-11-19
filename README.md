@@ -1,8 +1,9 @@
-# Domain Analyzer
+# Domain Analyzer v0.8.3
 ![example workflow](https://github.com/eldraco/domain_analyzer/actions/workflows/codeql-analysis.yml/badge.svg)
 
 ## What
-Domain analyzer is a security analysis tool which automatically discovers and reports information about the given domain. Its main purpose is to analyze domains in an unattended way.
+Domain analyzer is a security analysis tool that automatically discovers and reports information about a given domain. Its main purpose is to analyze domains in an unattended way.
+It has many crazy features, such as getting more domains from DNS zones, automatic nmap, webcrawler, and world domination mode. Check the features.
 
 If you want nmap to scan more ports and run scripts and to run the crawler on those websites, you need to be root.
 
@@ -14,7 +15,7 @@ If you want nmap to scan more ports and run scripts and to run the crawler on th
 ## How
 Domain analyzer takes a domain name and finds information about it, such as DNS servers, mail servers, IP addresses, mails on Google, SPF information, etc. After all the information is stored and organized it scans the ports of every IP found using nmap and perform several other security checks. After the ports are found, it uses the tool crawler.py from @verovaleros, to spider the complete web page of all the web ports found. This tool has the option to download files and find open folders.
 
-Current version is 0.8 and the main features are:
+The main features are:
 
 - It creates a directory with all the information, including nmap output files.
 - It uses colors to remark important information on the console. 
