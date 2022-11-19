@@ -818,6 +818,7 @@ def dns_request(domain):
                     # Analyzing results
                     found=False
                     for i in nmap_result:
+                        i = i.decode()
                         if i.find(domain)!=-1:
                             net_hostname=i.split('for ')[1].split(' (')[0].split('.')[0]
                             ip=i.split('(')[1].split(')')[0]
@@ -944,17 +945,15 @@ def check_PTR_record(ip):
     try:
         if debug:
             logging.debug('\t\t> Checking {0} ip reverse DNS hostname'.format(ip))
-
-        temp_ip=ip.split('.')
+        """
+        temp_ip = ip.split('.')
         temp_ip.reverse()
         reverse_ip=""
         for i in temp_ip:
-            reverse_ip=reverse_ip+i+'.'
-        reverse_ip=reverse_ip+'in-addr.arpa'
-        reverse_name_result = dns.resolver.resolve(reverse_ip, 'PTR')
-
-        for i in reverse_name_result:
-            reverse_name=i.to_text()[:-1]
+            reverse_ip = reverse_ip + i +'.'
+        reverse_ip = reverse_ip + 'in-addr.arpa'
+        """
+        reverse_name = dns.reversename.from_address(ip).to_text()[:-1]
         return reverse_name
 
     except Exception as inst:
@@ -1738,6 +1737,7 @@ def host_info(domain):
                             starttoread_port_section=0
                             starttoread_traceroute_section=0
                             for line in nmap_result:
+                                line = line.decode()
                                 # Learning port information
                                 # If we find the PORT word, we can start to analyze ports...
                                 if line.find('PORT') != -1:
