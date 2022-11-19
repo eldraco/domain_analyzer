@@ -800,8 +800,15 @@ def dns_request(domain):
                         if output_file!="":
                             output_file_handler.writelines('\t\tChecking netblock {0}\n'.format(ip_net_block))
                         nmap_command=shlex.split(nmap_command_temp)
-                        nmap_result_raw=Popen(nmap_command, stdout=PIPE).communicate()[0]
-                        nmap_result=nmap_result_raw.split('\n')
+                        nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
+                        nmap_result_raw = nmap_result_pipes[0]
+                        nmap_result_raw_stderr = nmap_result_pipes[1]
+                        if not nmap_result_raw_stderr:
+                            print('\t\tNmap seems to need root for better results')
+                        elif b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                            print('\t\tNmap seems to need root for better results')
+                            #print(f'\t\t{nmap_result_raw_stderr}')
+                        nmap_result = nmap_result_raw.split('\n')
 
                         netblocks_checked.append(ip_net_block)
                     else:
@@ -1617,10 +1624,19 @@ def check_active_host():
                         pass
                     nmap_command_temp = 'nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sn'
                 nmap_command=shlex.split(nmap_command_temp)
-                nmap_result=Popen(nmap_command, stdout=PIPE).communicate()[0]
-                if nmap_result.find(b'Host is up, received')!=-1:
-                    reason=nmap_result.split('received ')[1].split(' (')[0]
-                    hostup['HostUp']='True ('+reason+')'
+                nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
+                nmap_result_raw = nmap_result_pipes[0]
+                nmap_result_raw_stderr = nmap_result_pipes[1]
+                if not nmap_result_raw_stderr:
+                    print('\t\tNmap seems to need root for better results')
+                elif b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                    print('\tNmap seems to need root for better results')
+                    #print(f'\t\t{nmap_result_raw_stderr}')
+
+                nmap_result = nmap_result_raw.decode()
+                if nmap_result.find('Host is up, received')!=-1:
+                    reason = nmap_result.split('received ')[1].split(' (')[0]
+                    hostup['HostUp'] = 'True ('+reason+')'
                     ip_registry.append(hostup)
                     # We store it in the main dictionary
                     a=[]
@@ -1706,8 +1722,16 @@ def host_info(domain):
                                     nmap_command_temp='nmap '+nmap_scantype+' ' + ip + ' -oA '+output_directory+'/nmap/'+ip
                             # Do the nmap
                             nmap_command=shlex.split(nmap_command_temp)
-                            nmap_result_raw=Popen(nmap_command, stdout=PIPE).communicate()[0]
-                            nmap_result=nmap_result_raw.split('\n')
+                            nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
+                            nmap_result_raw = nmap_result_pipes[0]
+                            nmap_result_raw_stderr = nmap_result_pipes[1]
+                            if not nmap_result_raw_stderr:
+                                print('\t\tNmap seems to need root for better results')
+                            elif b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                                print('\t\tNmap seems to need root for better results')
+                                #print(f'\t\t{nmap_result_raw_stderr}')
+
+                            nmap_result = nmap_result_raw.split(b'\n')
                             #
                             # Now analyze nmaps output
                             # Searching for ports, service and scripts info
