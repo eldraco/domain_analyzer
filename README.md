@@ -111,7 +111,17 @@ Most of these features can be deactivated.
 
 ## Docker Image
 
-We are migrating the tool to run on Python 3, however, until a new version is released, we have created a docker image that can be used to run domain analyzer on Python 2.7, and has all the dependencies already installed.
+### Docker image
+
+Domain analyzer has now a docker image for the main version, on Python 3, with all dependencies already installed:
+
+```bash
+docker run --rm -ti verovaleros/domain_analyzer:latest /domain_analyzer/domain_analyzer.py -d <domain>
+```
+
+### Docker for Domain Analyzer on Python 2.7
+
+We have created a docker image that can be used to run domain analyzer on Python 2.7, and has all the dependencies already installed.
 
 `docker run --rm -it verovaleros/domain_analyzer:python2.7 /domain_analyzer/domain_analyzer.py -d <domain>`
 
