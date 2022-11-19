@@ -397,7 +397,7 @@ def get_NS_records(domain):
                         if debug:
                             logging.debug('\t\t> No country yet')
                         ipcountry={}
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
                         logging.debug('\t\t> Country: {0}'.format(country))
@@ -432,7 +432,7 @@ def get_NS_records(domain):
 
                     # Do we have the country of this ip?
                     if countrys:
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
 
@@ -459,9 +459,10 @@ def get_NS_records(domain):
 
 
     except Exception as inst:
-        logging.warning('\t\tWARNING! It seems that the NS server does not have an IP!')
+        logging.warning('\t\tError in get_NS_records()')
+        logging.warning(inst)
         if output_file!="":
-            output_file_handler.writelines('\t\tWARNING! It seems that the NS server does not have an IP!\n')
+            output_file_handler.writelines('\t\tError in get_NS_records()\n')
         return -1
     except KeyboardInterrupt:
         try:
