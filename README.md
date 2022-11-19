@@ -138,6 +138,15 @@ Domain analyzer was born on Feb 4th, 2011. You can check the original repository
 # Requests
 If you have any question, please send us an email! They are in the python files.
 
+## Installation
+Just untar the .tar.gz file and copy the python files to the /usr/bin/ directory. Domain_analyzer needs to be run as root. The crawler can be run as a non-privileged user.
+If you want all the features (web crawler, pdf and colors), which is nice, also copy these files to /usr/bin or /usr/local/bin
+
+- ansistrm.py
+- crawler.py
+- pyText2pdf.py
+
+If you have any issues with the GeoIP database, please download it from its original source [here](http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz). And install it in where your system needs it, usually at /opt/local/share/GeoIP/GeoIP.dat
 # Tofix
 
 sudo ./domain_analyzer.py -d cr -k 5 -s -g -p -a
@@ -148,3 +157,4 @@ HTTP Error 503: Service Unavailable
 <class 'urllib2.HTTPError'>
 ()
 
+# Requests

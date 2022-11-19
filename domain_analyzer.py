@@ -33,7 +33,7 @@
 #       - Changed robtex web url.
 # 0.6
 #    - Some minor bug fixes when dealing with host that do not have a host name or a PTR record.
-# 0.5   
+# 0.5
 #       - Added an option to download files from the crawler to the output directory
 #       - Now crawler results are obtained ok
 #       - Old udp option was deleted
@@ -63,7 +63,7 @@
 #    - We create a pdf report from the text file
 #    - We added subdomains automatic analysis. It can found recursive subdomains!
 #    - We added email searching for that domain in google sets and google
-# 0.4   
+# 0.4
 #    - Fixed a bug that prevented this to work fine under Debian systems. (Something with False!="" exploting)
 #    - Now the directory is not created until we know some DNS servers exist
 #    - Now if the domain does not exists, we exit
@@ -72,7 +72,7 @@
 #    - We create an output directory with everything into it.
 #    - A parameter -z to only scan host in the zone transfer. This is now stored correctly.
 #    - some minor typo fixes
-# 0.3  
+# 0.3
 #     - A parameter not to scan with nmap
 #     - A parameter to do everything only when ZT is successful
 # 0.2 New filename without dash
@@ -80,7 +80,7 @@
 # 0.1 feb 2 2011: Creation
 #
 # TODO
-# - We still don't read every nmap results 
+# - We still don't read every nmap results
 # - OBTAIN THE CRAWLER RESULTS CORRECLTY!!!
 # - Use threads to improve the performance.
 # - Create a tar.gz with everything!
@@ -112,20 +112,21 @@
 from subprocess import Popen
 from subprocess import PIPE
 from subprocess import call
-from ansistrm import *
+from ansistrm import ColorizingStreamHandler, logging
 import socket
 import os, sys
 import getopt
 try:
     import dns.resolver
 except:
-    print 'You need to install python-dnspython. apt-get install python-dnspython'
+    print("You need to install python-dnspython. apt-get install python-dnspython")
     sys.exit(-1)
 import dns.query
 import dns.zone
 import copy
 import shlex
 import time
+from geoip import geolite2
 
 ####################
 # Global Variables
@@ -136,17 +137,17 @@ vernum = "0.8.2"
 
 # domain_data{'IpsInfo'}
 #    {
-#    '1.1.1.1':    [     {'HostName':'test.com'}, 
-#                {'Type':'NS'}, 
-#                {'IpCountry':'Peru'}, 
-#                {'PTR':'rev.name.pe'}, 
-#                {'SubDomain':'other.test.com'}, 
-#                {'HostUp': True}, 
-#                {'PortInfo':'text'}    
-#                {'ScriptInfo':'text'}    
-#                {'OSInfo':'Linux'}    
-#                {'ZT': 23}    
-#                {'DirIndex':}    
+#    '1.1.1.1':    [     {'HostName':'test.com'},
+#                {'Type':'NS'},
+#                {'IpCountry':'Peru'},
+#                {'PTR':'rev.name.pe'},
+#                {'SubDomain':'other.test.com'},
+#                {'HostUp': True},
+#                {'PortInfo':'text'}
+#                {'ScriptInfo':'text'}
+#                {'OSInfo':'Linux'}
+#                {'ZT': 23}
+#                {'DirIndex':}
 #            ]
 #    '2.2.2.2':    [
 #            ]
@@ -219,7 +220,6 @@ world_domination=False
 
 # By default resolve country names
 countrys=True
-geoip_cache=""
 
 colors=True
 
@@ -257,66 +257,66 @@ zenmap_command = 'zenmap'
 
 
 
-# Print version information 
+# Print version information
 def version():
-  print "+----------------------------------------------------------------------+"
-  print "| "+ sys.argv[0] + " Version "+ vernum +"                         |"
-  print "| This program is free software; you can redistribute it and/or modify |"
-  print "| it under the terms of the GNU General Public License as published by |"
-  print "| the Free Software Foundation; either version 2 of the License, or    |"
-  print "| (at your option) any later version.                                  |"
-  print "|                                                                      |"
-  print "| Author: Garcia Sebastian, eldraco@gmail.com                          |"
-  print "| Author: Veronica Valeros, vero.valeros@gmail.com                     |"
-  print "| www.mateslab.com.ar - Argentina                                      |"
-  print "+----------------------------------------------------------------------+"
-  print
+  print("+----------------------------------------------------------------------+")
+  print("| "+ sys.argv[0] + " Version "+ vernum +"                         |")
+  print("| This program is free software; you can redistribute it and/or modify |")
+  print("| it under the terms of the GNU General Public License as published by |")
+  print("| the Free Software Foundation; either version 2 of the License, or    |")
+  print("| (at your option) any later version.                                  |")
+  print("|                                                                      |")
+  print("| Author: Garcia Sebastian, eldraco@gmail.com                          |")
+  print("| Author: Veronica Valeros, vero.valeros@gmail.com                     |")
+  print("| www.mateslab.com.ar - Argentina                                      |")
+  print("+----------------------------------------------------------------------+")
+  print()
 
 # Print help information and exit:
 def usage():
-#  print "+----------------------------------------------------------------------+"
-#  print "| "+ sys.argv[0] + " Version "+ vernum +"                         |"
-#  print "| This program is free software; you can redistribute it and/or modify |"
-#  print "| it under the terms of the GNU General Public License as published by |"
-#  print "| the Free Software Foundation; either version 2 of the License, or    |"
-#  print "| (at your option) any later version.                                  |"
-#  print "|                                                                      |"
-#  print "| Author: Garcia Sebastian, eldraco@gmail.com                          |"
-#  print "| Author: Veronica Valeros, vero.valeros@gmail.com                     |"
-#  print "| www.mateslab.com.ar - Argentina                                      |"
-#  print "+----------------------------------------------------------------------+"
-  print "\nusage: %s -d <domain> <options>" % sys.argv[0]
-  print "options:"
-  print "  -h, --help                            Show this help message and exit."
-  print "  -V, --version                         Output version information and exit."
-  print "  -D, --debug                           Debug."
-  print "  -d, --domain                          Domain to analyze."
-  print "  -L <list>, --common-hosts-list <list> Relative path to txt file containing common hostnames. One name per line."
-  print "  -j, --not-common-hosts-names          Do not check common host names. Quicker but you will lose hosts."
-  print "  -t, --not-zone-transfer               Do not attempt to transfer the zone."
-  print "  -n, --not-net-block                   Do not attempt to -sL each IP netblock."
-  print "  -o, --store-output                    Store everything in a directory named as the domain. Nmap output files and the summary are stored inside."
-  print "  -a, --not-scan-or-active              Do not use nmap to scan ports nor to search for active hosts."
-  print "  -p, --not-store-nmap                  Do not store any nmap output files in the directory <output-directory>/nmap."
-  print "  -e, --zenmap                          Move xml nmap files to a directory and open zenmap with the topology of the whole group. Your user should have access to the DISPLAY variable."
-  print "  -g, --not-goog-mail                   Do not use goog-mail.py (embebed) to look for emails for each domain"
-  print "  -s, --not-subdomains                  Do not analyze sub-domains recursively. You will lose subdomain internal information."
-  print "  -f, --create-pdf                      Create a pdf file with all the information."
-  print "  -l, --world-domination                Scan every gov,mil,org and net domains of every country on the world. Interesting if you don't use -s"
-  print "  -r, --robin-hood                      Send the pdf report to every email found using domains the MX servers found. Good girl."
-  print "  -w, --not-webcrawl                    Do not web crawl every web site (in every port) we found looking for public web mis-configurations (Directory listing, etc.)."
-  print "  -m, --max-amount-to-crawl             If you crawl, do it up to this amount of links for each web site. Defaults to 50."
-  print "  -F, --download-files                  If you crawl, download every file to disk."
-  print "  -c, --not-countrys                    Do not resolve the country name for every IP and hostname."
-  print "  -C, --not-colors                      Do not use colored output."
-  print "  -q, --not-spf                         Do not check SPF records."
-  print "  -k, --random-domains                  Find this amount of domains from google and analyze them. For base domain use -d"
-  print "  -v, --ignore-host-pattern             When using nmap to find active hosts and to port scan, ignore hosts which names match this pattern. Separete them with commas."
-  print "  -x, --nmap-scantype                   Nmap parameters to port scan. Defaults to: '-O --reason --webxml --traceroute -sS -sV -sC -PN -n -v -F' ."
-  print "  -b, --robtex-domains                  If we found a DNS server with zone transfer activated, search other UNrelated domains using that DNS server with robtex and analyze them too."
-  print "  -B, --all-robtex                      Like -b, but also if no Zone Transfer was found. Useful to analyze all the domains in one corporative DNS server. Includes also -b."
-  print "Press CTRL-C at any time to stop only the current step."
-  print
+#  print("+----------------------------------------------------------------------+")
+#  print("| "+ sys.argv[0] + " Version "+ vernum +"                         |")
+#  print("| This program is free software; you can redistribute it and/or modify |")
+#  print("| it under the terms of the GNU General Public License as published by |")
+#  print("| the Free Software Foundation; either version 2 of the License, or    |")
+#  print("| (at your option) any later version.                                  |")
+#  print("|                                                                      |")
+#  print("| Author: Garcia Sebastian, eldraco@gmail.com                          |")
+#  print("| Author: Veronica Valeros, vero.valeros@gmail.com                     |")
+#  print("| www.mateslab.com.ar - Argentina                                      |")
+#  print("+----------------------------------------------------------------------+")
+  print("\nusage: %s -d <domain> <options>" % sys.argv[0])
+  print("options:")
+  print("  -h, --help                     Show this help message and exit.")
+  print("  -V, --version                  Output version information and exit.")
+  print("  -D, --debug                Debug.")
+  print("  -d, --domain                Domain to analyze.")
+  print("  -L <list>, --common-hosts-list <list>    Relative path to txt file containing common hostnames. One name per line.")
+  print("  -j, --not-common-hosts-names        Do not check common host names. Quicker but you will lose hosts.")
+  print("  -t, --not-zone-transfer          Do not attempt to transfer the zone.")
+  print("  -n, --not-net-block              Do not attempt to -sL each IP netblock.")
+  print("  -o, --store-output             Store everything in a directory named as the domain. Nmap output files and the summary are stored inside.")
+  print("  -a, --not-scan-or-active          Do not use nmap to scan ports nor to search for active hosts.")
+  print("  -p, --not-store-nmap          Do not store any nmap output files in the directory <output-directory>/nmap.")
+  print("  -e, --zenmap                  Move xml nmap files to a directory and open zenmap with the topology of the whole group. Your user should have access to the DISPLAY variable.")
+  print("  -g, --not-goog-mail              Do not use goog-mail.py (embebed) to look for emails for each domain")
+  print("  -s, --not-subdomains          Do not analyze sub-domains recursively. You will lose subdomain internal information.")
+  print("  -f, --create-pdf              Create a pdf file with all the information.")
+  print("  -l, --world-domination          Scan every gov,mil,org and net domains of every country on the world. Interesting if you don't use -s")
+  print("  -r, --robin-hood              Send the pdf report to every email found using domains the MX servers found. Good girl.")
+  print("  -w, --not-webcrawl              Do not web crawl every web site (in every port) we found looking for public web mis-configurations (Directory listing, etc.).")
+  print("  -m, --max-amount-to-crawl        If you crawl, do it up to this amount of links for each web site. Defaults to 50.")
+  print("  -F, --download-files            If you crawl, download every file to disk.")
+  print("  -c, --not-countrys            Do not resolve the country name for every IP and hostname.")
+  print("  -C, --not-colors            Do not use colored output.")
+  print("  -q, --not-spf                Do not check SPF records.")
+  print("  -k, --random-domains            Find this amount of domains from google and analyze them. For base domain use -d")
+  print("  -v, --ignore-host-pattern        When using nmap to find active hosts and to port scan, ignore hosts which names match this pattern. Separete them with commas.")
+  print("  -x, --nmap-scantype            Nmap parameters to port scan. Defaults to: '-O --reason --webxml --traceroute -sS -sV -sC -PN -n -v -F' .")
+  print("  -b, --robtex-domains            If we found a DNS server with zone transfer activated, search other UNrelated domains using that DNS server with robtex and analyze them too.")
+  print("  -B, --all-robtex            Like -b, but also if no Zone Transfer was found. Useful to analyze all the domains in one corporative DNS server. Includes also -b.")
+  print("Press CTRL-C at any time to stop only the current step.")
+  print()
   sys.exit(1)
 
 
@@ -334,23 +334,22 @@ def get_NS_records(domain):
     global not_store_nmap
     global subdomains_found
     global not_subdomains
-    global geoip_cache
     global output_file_handler
     global countrys
 
     hosttype={}
     reverseDNS={}
-    hostname={}    
+    hostname={}
     ip_registry=[]
 
 
     #
     # Here we obtain the NS servers for the domain
     #
-    try: 
+    try:
 
 
-        print '\tChecking NameServers using system default resolver...'
+        print('\tChecking NameServers using system default resolver...')
         if output_file!="":
             output_file_handler.writelines('\tChecking NameServers using system default resolver...\n')
         # Get the list of name servers IPs
@@ -363,10 +362,10 @@ def get_NS_records(domain):
 
             if debug:
                 logging.debug('\t\t> Looking for {0} IP address'.format(rdata.to_text()))
-            # We search for the IP of each NSs    
+            # We search for the IP of each NSs
             ip_list = dns.resolver.query(rdata.to_text()[:-1], 'A')
+
             # For each IP we store its information
-            
             for ip in ip_list:
                 ip_registry=[]
                 if debug:
@@ -374,13 +373,14 @@ def get_NS_records(domain):
 
                 try:
                     # If already exists this IP in the registry
-                    # We search for this IP in the main dict 
+                    # We search for this IP in the main dict
 
                     ip_registry=domain_data['IpsInfo'][ip.to_text()]
 
                     # Here we store the hostname in a dictionary. The index is 'HostName'
                     hostname['HostName']=rdata.to_text()[:-1]
                     ip_registry.append(hostname)
+
                     # Here we store the type of register in a dictionary. The index is 'Type'
                     hosttype['Type']='NS'
                     ip_registry.append(hosttype)
@@ -389,7 +389,7 @@ def get_NS_records(domain):
                     # Do we have the country of this ip?
                     has_country=False
                     for dicts in ip_registry:
-                        if dicts.has_key('IpCountry'):
+                        if dicts.__contains__('IpCountry'):
                             has_country=True
 
                     if not has_country and countrys:
@@ -397,17 +397,17 @@ def get_NS_records(domain):
                         if debug:
                             logging.debug('\t\t> No country yet')
                         ipcountry={}
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
-                        if debug:
-                            logging.debug('\t\t> Country: {0}'.format(country))
+                        logging.debug('\t\t> Country: {0}'.format(country))
+
 
 
                     # Obtain Ip's reverse DNS name if we don't have it
                     has_ptr=False
                     for dicts in ip_registry:
-                        if dicts.has_key('PTR'):
+                        if dicts.__contains__('PTR'):
                             has_ptr=True
 
                     if not has_ptr:
@@ -433,7 +433,7 @@ def get_NS_records(domain):
 
                     # Do we have the country of this ip?
                     if countrys:
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
 
@@ -460,14 +460,15 @@ def get_NS_records(domain):
 
 
     except Exception as inst:
-        logging.warning('\t\tWARNING! It seems that the NS server does not have an IP!')
+        logging.warning('\t\tError in get_NS_records()')
+        logging.warning(inst)
         if output_file!="":
-            output_file_handler.writelines('\t\tWARNING! It seems that the NS server does not have an IP!\n')
+            output_file_handler.writelines('\t\tError in get_NS_records()\n')
         return -1
     except KeyboardInterrupt:
         try:
             # CTRL-C pretty handling.
-            print "Keyboard Interruption!. Skiping the NS search step. Press CTRL-C again to exit."
+            print("Keyboard Interruption!. Skiping the NS search step. Press CTRL-C again to exit.")
             time.sleep(1)
             return (2)
 
@@ -491,25 +492,24 @@ def get_MX_records(domain):
     global not_store_nmap
     global subdomains_found
     global not_subdomains
-    global geoip_cache
     global output_file_handler
     global countrys
 
     hosttype={}
     reverseDNS={}
-    hostname={}    
+    hostname={}
     ip_registry=[]
     #
     # Here we obtain the MX servers for the domain
     #
 
-    print '\n\tChecking MailServers using system default resolver...'
+    print('\n\tChecking MailServers using system default resolver...')
     if output_file!="":
         output_file_handler.writelines('\n\tChecking MailServers using system default resolver...\n')
     try:
         mail_servers = dns.resolver.query(domain, 'MX')
         for rdata in mail_servers:
-            # We search for the IP of each NSs    
+            # We search for the IP of each NSs
             ip_list = dns.resolver.query(rdata.exchange.to_text()[:-1], 'A')
             # For each IP we store its information
             for ip in ip_list:
@@ -517,8 +517,8 @@ def get_MX_records(domain):
 
                 try:
                     # If already exists this IP in the registry
-                    # We search for this IP in the main dict 
-                    
+                    # We search for this IP in the main dict
+
                     ip_registry=domain_data['IpsInfo'][ip.to_text()]
 
                     # Here we store the hostname in a dictionary. The index is 'HostName'
@@ -531,7 +531,7 @@ def get_MX_records(domain):
                     # Do we have the country of this ip?
                     has_country=False
                     for dicts in ip_registry:
-                        if dicts.has_key('IpCountry'):
+                        if dicts.__contains__('IpCountry'):
                             has_country=True
 
                     if not has_country and countrys:
@@ -539,16 +539,15 @@ def get_MX_records(domain):
                         if debug:
                             logging.debug('\t\t> No country yet')
                         ipcountry={}
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
-                        if debug:
-                            logging.debug('\t\t> Country: {0}'.format(country))
+                        logging.info('\t\t> Country: {0}'.format(country))
 
                     # Obtain Ip's reverse DNS name if we don't have it
                     has_ptr=False
                     for dicts in ip_registry:
-                        if dicts.has_key('PTR'):
+                        if dicts.__contains__('PTR'):
                             has_ptr=True
 
                     if not has_ptr:
@@ -571,14 +570,14 @@ def get_MX_records(domain):
                     # If this is a new IP
                     ip_registry=[]
                     ipcountry={}
-            
+
                     if countrys:
                         # Do we have the country of this ip?
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
                         if debug:
-                            logging.debug('\t\t> Country: {0}'.format(country))
+                            logging.info('\t\t> Country: {0}'.format(country))
 
                     # Here we store the hostname in a dictionary. The index is 'HostName'
                     hostname['HostName']=rdata.exchange.to_text()[:-1]
@@ -628,20 +627,19 @@ def dns_request(domain):
     global subdomains_found
     global not_subdomains
     global common_hostnames
-    global geoip_cache
     global output_file_handler
     global countrys
 
     try:
         hosttype={}
         reverseDNS={}
-        hostname={}    
+        hostname={}
         ip_registry=[]
 
 
         if check_common_hosts_names==False:
             common_hostnames=[]
-        
+
 
         elif use_common_list == True:
             common_hostnames=[]
@@ -657,7 +655,7 @@ def dns_request(domain):
         # Here we obtain the NS servers for the domain
         #
         get_NS_records(domain)
-        
+
         #
         # Here we obtain the MX servers for the domain
         #
@@ -672,20 +670,19 @@ def dns_request(domain):
             logging.warning('\t\tWARNING!! This domain has wildcards activated for hostnames resolution. We are checking "www" anyway, but perhaps it doesn\'t exists!')
             if output_file!="":
                 output_file_handler.writelines('\t\tWARNING!! This domain has wildcards activated for hostnames resolution. We are checking "www" anyway, but perhaps it doesn\'t exists!\n')
-            
+
             # If wildcard is activated we don't check common hostnames except for www, it is too common not to be there!
             common_hostnames=['www']
         except:
             # If wildcard is not activated we check every hostname
             pass
 
-    
         #
         # Here we check the zone transfer for each NS
         #
 
         if zone_transfer:
-            print '\n\tChecking the zone transfer for each NS... (if this takes more than 10 seconds, just hit CTRL-C and it will continue. Bug in the libs)'
+            print('\n\tChecking the zone transfer for each NS... (if this takes more than 10 seconds, just hit CTRL-C and it will continue. Bug in the libs)')
             if output_file!="":
                 output_file_handler.writelines('\n\tChecking the zone transfer for each NS... (if this takes more than 10 seconds, just hit CTRL-C and it will continue. Bug in the libs)\n')
             try:
@@ -693,7 +690,7 @@ def dns_request(domain):
 
                 for ip in domain_data['IpsInfo']:
                     for dicts in domain_data['IpsInfo'][ip]:
-                        if dicts.has_key('Type'):
+                        if dicts.__contains__('Type'):
                             if dicts['Type']=='NS':
                                 name_servers_list.append(ip)
 
@@ -704,9 +701,9 @@ def dns_request(domain):
                 for ip in name_servers_list:
                     try:
                         zone_transfer_data = dns.zone.from_xfr(dns.query.xfr(ip, domain,timeout=-1))
-                        logging.critical('\t\tZone transfer successful on name server {0} ({1} hosts)'.format(ip, len(zone_transfer_data.items())))
+                        logging.critical('\t\tZone transfer successful on name server {0} ({1} hosts)'.format(ip, len(list(zone_transfer_data.items()))))
                         if output_file!="":
-                            output_file_handler.writelines('\t\tZone transfer successful on name server {0} ({1} hosts)\n'.format(ip, len(zone_transfer_data.items())))
+                            output_file_handler.writelines('\t\tZone transfer successful on name server {0} ({1} hosts)\n'.format(ip, len(list(zone_transfer_data.items()))))
                         # We should store this information in OS info or something...
                         ip_registry=[]
                         hosttype={}
@@ -719,7 +716,7 @@ def dns_request(domain):
                             hosttype['ZT']=len(zone_transfer_data.items())
                             ip_registry.append(hosttype)
                             if debug:
-                                logging.debug('\t\t> Storing ZT data for {0} : {1} hostnames: {2}'.format(ip,len(zone_transfer_data.items()),zone_transfer_data.keys()))
+                                logging.debug('\t\t> Storing ZT data for {0} : {1} hostnames: {2}'.format(ip,len(list(zone_transfer_data.items())), zone_transfer_data.keys()))
                             # We store it in the main dictionary
                             a=[]
                             a=copy.deepcopy(ip_registry)
@@ -729,20 +726,20 @@ def dns_request(domain):
                                 logging.warning('\t> WARNING! NS should be already stored in memory, and this one is not: {0}'.format(ip))
 
                         # If we found a zone transfer, we should not use the common_hostnames. It is enough with the zone! Thanks to Agustin Gugliotta
-                        common_hostnames = [] 
+                        common_hostnames = []
                         for host in zone_transfer_data:
                             #if not(host in common_hostnames) and not('@' in host.to_text())and not ( '*' in host.to_text()):
                             common_hostnames.append(host.to_text())
 
 
                     except:
-                        print '\t\tNo zone transfer found on nameserver {0}'.format(ip)
+                        print(f'\t\tNo zone transfer found on nameserver {ip}')
                         if output_file!="":
                             output_file_handler.writelines('\t\tNo zone transfer found on nameserver {0}\n'.format(ip))
             except KeyboardInterrupt:
                 try:
                     # CTRL-C pretty handling.
-                    print "Keyboard Interruption!. Skiping the zone transfer step. Press CTRL-C again to exit."
+                    print("Keyboard Interruption!. Skiping the zone transfer step. Press CTRL-C again to exit.")
                     time.sleep(1)
                     return (2)
 
@@ -751,7 +748,6 @@ def dns_request(domain):
             except:
                 logging.warning('\t\tZone error?')
                 pass
-    
 
         #
         # Here we look for SPF record to obtain new IP address
@@ -759,20 +755,19 @@ def dns_request(domain):
         check_SPF_record(domain)
 
         #
-        # Here we check the A records of the hosts names, included de most common ones. 
+        # Here we check the A records of the hosts names, included de most common ones.
         # This function is called BEFORE the nmap sL scan, so that we can include every netblock in the sL scan.
         #
         check_A_records(domain,'most common')
-    
 
         #
         # Here we obtain the host names for each IP of every netblock using sL
         #
         if net_block:
-            print '\n\tChecking with nmap the reverse DNS hostnames of every <ip>/24 netblock using system default resolver...'
+            print('\n\tChecking with nmap the reverse DNS hostnames of every <ip>/24 netblock using system default resolver...')
             if output_file!="":
                 output_file_handler.writelines('\n\tChecking with nmap the reverse DNS hostnames of every <ip>/24 netblock using system default resolver...\n')
-            try: 
+            try:
                 # We already check the common hostnames, this is just for the ones found by nmap sL
                 common_hostnames2=copy.deepcopy(common_hostnames)
                 common_hostnames=[]
@@ -796,28 +791,34 @@ def dns_request(domain):
                     if ip_net_block not in netblocks_checked:
 
                         if output_directory==False or not_store_nmap == 1:
-                            nmap_command_temp='nmap -sL -v '+ip_net_block+'/24' 
+                            nmap_command_temp='nmap -sL -v '+ip_net_block+'/24'
                         else:
                             try:
                                 os.mkdir(output_directory+'/nmap')
                             except OSError:
                                 pass
                             nmap_command_temp='nmap -sL -v '+ip_net_block+'/24 -oA '+output_directory+'/nmap/'+ip_net_block+'.sL'
-                        print '\t\tChecking netblock {0}'.format(ip_net_block)
+                        print(f'\t\tChecking netblock {ip_net_block}')
                         if output_file!="":
                             output_file_handler.writelines('\t\tChecking netblock {0}\n'.format(ip_net_block))
                         nmap_command=shlex.split(nmap_command_temp)
-                        nmap_result_raw=Popen(nmap_command, stdout=PIPE).communicate()[0]
-                        nmap_result=nmap_result_raw.split('\n')
+                        nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
+                        nmap_result_raw = nmap_result_pipes[0]
+                        nmap_result_raw_stderr = nmap_result_pipes[1]
+                        if b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                            print('\t\tNmap seems to need root for better results')
+                            #print(f'\t\t{nmap_result_raw_stderr}')
+                        nmap_result = nmap_result_raw.split('\n')
 
                         netblocks_checked.append(ip_net_block)
                     else:
                         if debug:
                             logging.debug('\t\t> Netblock {0} already resolved'.format(ip_net_block))
-                
+
                     # Analyzing results
                     found=False
                     for i in nmap_result:
+                        i = i.decode()
                         if i.find(domain)!=-1:
                             net_hostname=i.split('for ')[1].split(' (')[0].split('.')[0]
                             ip=i.split('(')[1].split(')')[0]
@@ -834,14 +835,14 @@ def dns_request(domain):
                                 # Add this IP to the main dictionary, with its PTR record found
                                 try:
                                     # If already exists this IP in the registry
-                                    # We search for this IP in the main dict 
+                                    # We search for this IP in the main dict
                                     ip_registry=domain_data['IpsInfo'][ip]
                                     if debug:
                                         logging.debug('\t\t\t\tThe IP {1} was not new, adding {0} as PTR if it not there.'.format(net_hostname,ip))
                                     # Do we have the country of this ip?
                                     has_country=False
                                     for dicts in ip_registry:
-                                        if dicts.has_key('IpCountry'):
+                                        if dicts.__contains__('IpCountry'):
                                             has_country=True
 
                                     if not has_country and countrys:
@@ -849,16 +850,15 @@ def dns_request(domain):
                                         if debug:
                                             logging.debug('\t\t> No country yet')
                                         ipcountry={}
-                                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                                        country=geolite2.lookup(ip.to_text()).country
                                         ipcountry['IpCountry']=country
                                         ip_registry.append(ipcountry)
-                                        if debug:
-                                            logging.debug('\t\t> Country: {0}'.format(country))
+                                        logging.info('\t\t> Country: {0}'.format(country))
 
                                     # Obtain Ip's reverse DNS name if we don't have it
                                     has_ptr=False
                                     for dicts in ip_registry:
-                                        if dicts.has_key('PTR'):
+                                        if dicts.__contains__('PTR'):
                                             has_ptr=True
 
                                     if not has_ptr:
@@ -884,10 +884,10 @@ def dns_request(domain):
                                     if debug:
                                         logging.debug('\t\t\t\tThe IP {1} was new, adding it, the country and {0} as PTR.'.format(net_hostname,ip))
 
-                                    
+
                                     if countrys:
                                         # Do we have the country of this ip?
-                                        country=geoip_cache.country_name_by_addr(ip)
+                                        country=geolite2.lookup(ip).country
                                         ipcountry['IpCountry']=country
                                         ip_registry.append(ipcountry)
 
@@ -905,7 +905,7 @@ def dns_request(domain):
 
 
                 #
-                # Here we check the A records of the hosts names found with nmap sL only. This function is called AFTER the nmap sL 
+                # Here we check the A records of the hosts names found with nmap sL only. This function is called AFTER the nmap sL
                 # scan, so that we can include every netblock in the sL scan.
                 #
 
@@ -915,7 +915,7 @@ def dns_request(domain):
             except KeyboardInterrupt:
                 try:
                     # CTRL-C pretty handling.
-                    print "Keyboard Interruption!. Skiping the netblock resolution step. Press CTRL-C again to exit."
+                    print("Keyboard Interruption!. Skiping the netblock resolution step. Press CTRL-C again to exit.")
                     time.sleep(1)
                     return (2)
 
@@ -926,12 +926,12 @@ def dns_request(domain):
 
 
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to printed directly
         x, y = inst          # __getitem__ allows args to be unpacked directly
-        print 'x =', x
-        print 'y =', y
+        print('x =', x)
+        print('y =', y)
 
 
 
@@ -945,25 +945,25 @@ def check_PTR_record(ip):
     try:
         if debug:
             logging.debug('\t\t> Checking {0} ip reverse DNS hostname'.format(ip))
-
-        temp_ip=ip.split('.')
+        """
+        temp_ip = ip.split('.')
         temp_ip.reverse()
         reverse_ip=""
         for i in temp_ip:
-            reverse_ip=reverse_ip+i+'.'
-        reverse_ip=reverse_ip+'in-addr.arpa'
-        reverse_name_result = dns.resolver.query(reverse_ip, 'PTR')
-
-        for i in reverse_name_result:
-            reverse_name=i.to_text()[:-1]
+            reverse_ip = reverse_ip + i +'.'
+        reverse_ip = reverse_ip + 'in-addr.arpa'
+        """
+        reverse_name = dns.reversename.from_address(ip).to_text()[:-1]
         return reverse_name
 
-
     except Exception as inst:
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to printed directly
+        x, y = inst          # __getitem__ allows args to be unpacked directly
+        print('x =', x)
+        print('y =', y)
         return ""
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
 
 
 
@@ -982,7 +982,7 @@ def check_SPF_record(domain):
     if check_spf:
 
         try:
-            print'\n\tChecking SPF record...'
+            print('\n\tChecking SPF record...')
             if output_file!="":
                 output_file_handler.writelines('\n\tChecking SPF record...\n')
 
@@ -994,7 +994,7 @@ def check_SPF_record(domain):
                 if 'v=spf' in spf_record.to_text():
                     # We found a SPF record
                     if debug:
-                        print '\t\t> SPf record found: {0}'.format(spf_record.to_text())
+                        print(f'\t\t> SPf record found: {spf_record.to_text()}')
 
                     hosttype={}
                     ip_registry=[]
@@ -1024,7 +1024,7 @@ def check_SPF_record(domain):
                         # Look for ip version 4 and 6 addresses
                         if 'ip' in part:
                             # Extract new ip4 ips
-                            try: 
+                            try:
                                 if '/' in part:
                                     logging.warning('\t\tWARNING! SPF record allows an entire network to send mails. Probably an ISP network. We are not going to check the entire network by now: {0}, but only the network IP'.format(part.split('ip4')[1].split()[0][1:]))
                                     if output_file!="":
@@ -1076,7 +1076,7 @@ def check_SPF_record(domain):
                                 if output_file!="":
                                     output_file_handler.writelines('\t\t\tThere are no IPv4 addresses in the SPF. Maybe IPv6.\n')
                                 continue
-        except :    
+        except:
             logging.error('\t\tNo SPF record')
             if output_file!="":
                 output_file_handler.writelines('\t\tNo SPF record\n')
@@ -1102,14 +1102,13 @@ def check_A_records(domain,text=""):
     global subdomains_found
     global not_subdomains
     global common_hostnames
-    global geoip_cache
     global output_file_handler
     global countrys
 
     try:
         hosttype={}
-        hostname={}    
-        ipcountry={}    
+        hostname={}
+        ipcountry={}
         ip_registry=[]
         reverseDNS={}
         first_ctrl_c=True
@@ -1119,17 +1118,17 @@ def check_A_records(domain,text=""):
         # Here we obtain the A records for the common host names using system default resolver
         #
 
-        # Making unique values of common_hostname vector            
+        # Making unique values of common_hostname vector
         unique_list=[]
         for i in common_hostnames:
             if i not in unique_list:
                 unique_list.append(i)
-        
-        print '\n\tChecking {0} {1} hostnames using system default resolver...'.format(len(unique_list),text)
+
+        print(f'\n\tChecking {len(unique_list)} {text} hostnames using system default resolver...')
         if output_file!="":
             output_file_handler.writelines('\n\tChecking {0} {1} hostnames using system default resolver...\n'.format(len(unique_list),text))
-        
-        # For each of the host names    
+
+        # For each of the host names
         for common_host in unique_list:
             try:
                 # We search host IP
@@ -1161,7 +1160,7 @@ def check_A_records(domain,text=""):
                             # For example we avoid adding test.test.com
 
                             if common_host != domain.split('.')[0]:
-                                # We add the new subdomain for later analysis 
+                                # We add the new subdomain for later analysis
                                 ip_registry=[]
                                 subdomain={}
                                 for ip in host_name_ips:
@@ -1195,7 +1194,7 @@ def check_A_records(domain,text=""):
             except KeyboardInterrupt:
                 try:
                     # CTRL-C pretty handling.
-                    print "Keyboard Interruption!. Skiping the hostname search step. Press CTRL-C quickly again to exit. Or wait 1 second and press CTRL-C again to continue."
+                    print("Keyboard Interruption!. Skiping the hostname search step. Press CTRL-C quickly again to exit. Or wait 1 second and press CTRL-C again to continue.")
                     time.sleep(1)
                     if first_ctrl_c == True:
                         first_ctrl_c=False
@@ -1228,18 +1227,17 @@ def check_A_records(domain,text=""):
                         # Do we have the country of this ip?
                         has_country=False
                         for dicts in ip_registry:
-                            if dicts.has_key('IpCountry'):
+                            if dicts.__contains__('IpCountry'):
                                 has_country=True
 
                         if not has_country and countrys:
                             # We don't have this country
                             if debug:
                                 logging.debug('\t\t> No country yet')
-                            country=geoip_cache.country_name_by_addr(ip.to_text())
+                            country=geolite2.lookup(ip.to_text()).country
                             ipcountry['IpCountry']=country
                             ip_registry.append(ipcountry)
-                            if debug:
-                                logging.debug('\t\t> Country: {0}'.format(country))
+                            logging.info('\t\t> Country: {0}'.format(country))
 
                         # Here we store the hostname in a dictionary. The index is 'HostName'
                         hostname['HostName']=common_host+'.'+domain
@@ -1251,7 +1249,7 @@ def check_A_records(domain,text=""):
                         # Obtain Ip's reverse DNS name if we don't have it
                         has_ptr=False
                         for dicts in ip_registry:
-                            if dicts.has_key('PTR'):
+                            if dicts.__contains__('PTR'):
                                 has_ptr=True
 
                         if not has_ptr:
@@ -1275,7 +1273,7 @@ def check_A_records(domain,text=""):
 
                     if countrys:
                         # Search the country of the IP
-                        country=geoip_cache.country_name_by_addr(ip.to_text())
+                        country=geolite2.lookup(ip.to_text()).country
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
 
@@ -1295,7 +1293,7 @@ def check_A_records(domain,text=""):
                 except KeyboardInterrupt:
                     try:
                         # CTRL-C pretty handling.
-                        print "Keyboard Interruption!. Skiping IP resolution step. Press CTRL-C again to exit."
+                        print("Keyboard Interruption!. Skiping IP resolution step. Press CTRL-C again to exit.")
                         time.sleep(1)
                         return (2)
 
@@ -1304,14 +1302,17 @@ def check_A_records(domain,text=""):
 
 
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to printed directly
+        x, y = inst          # __getitem__ allows args to be unpacked directly
+        print('x =', x)
+        print('y =', y)
 
     except KeyboardInterrupt:
         try:
             # CTRL-C pretty handling.
-            print "Keyboard Interruption!. Skiping entire step. Press CTRL-C again to exit."
+            print("Keyboard Interruption!. Skiping entire step. Press CTRL-C again to exit.")
             time.sleep(1)
             return (2)
 
@@ -1330,9 +1331,7 @@ def find_and_analyze_random_domains(domain, amount):
     global output_file_handler
 
     try:
-        import string
-        import httplib
-        import urllib2
+        from  urllib import request
         import re
         import random
         domain_dict={}
@@ -1349,7 +1348,7 @@ def find_and_analyze_random_domains(domain, amount):
 
         # Add slashes before every dot
         domain_re=domain.replace('.','\.')
-        
+
 
         # Initialize random seed
         random.seed()
@@ -1360,20 +1359,20 @@ def find_and_analyze_random_domains(domain, amount):
             page_counter_web = random.randrange(1,100,10)
             try:
                 results_web = 'http://www.google.com/search?q=inurl%3a'+str(domain)+'&hl=en&btnG=Search&aq=f&start='+ repr(page_counter_web) + '&sa=N'
-                request_web = urllib2.Request(results_web)
+                request_web = request.Request(results_web)
                 request_web.add_header('User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
-                opener_web = urllib2.build_opener()
+                opener_web = request.build_opener()
                 text = opener_web.open(request_web).read()
-        
+
                 # This re extracts the domains
-                domains_web = (re.findall('(http:\/\/\w[\w\.\-]+\.'+domain_re+')',text))
+                domains_web = (re.findall(bytes('(http:\/\/\w[\w\.\-]+\.'+domain_re+')', encoding='utf-8'), text))
 
                 if debug:
-                    print '\tDomains: {0}'.format(domains_web)
+                    print(f'\tDomains: {domains_web}')
 
                 # For every domain found, we store them in a dictionary
                 for dom_web in domains_web:
-                    # 0 means not-analyzed    
+                    # 0 means not-analyzed
                     try:
                         # If it already existed... leave it
                         test_domain=domain_dict[dom_web]
@@ -1391,9 +1390,9 @@ def find_and_analyze_random_domains(domain, amount):
                         output_file_handler.writelines('\tWARNING! Something prevent us from obtaining results from google. Try again the same command until it succeed1. If it does not work (because you use this feature many times) google could have blocked you for five minutes or so.\n')
                     return -1
 
-                
+
                 # For every domain found, verify it.
-                for uniq_domains_web in domain_dict.keys():
+                for uniq_domains_web in list(domain_dict.keys()):
                     if 'http://' in uniq_domains_web:
                         temp=uniq_domains_web
                         uniq_domains_web=temp[temp.index('http://')+7:]
@@ -1424,23 +1423,23 @@ def find_and_analyze_random_domains(domain, amount):
                         temp_final=final_dict[uniq_domains_web]
                     except:
                         # Store it
-                        # 0 means not-analyzed    
+                        # 0 means not-analyzed
                         final_dict[uniq_domains_web]=0
 
                 if final_dict == []:
-                    print '\tNo more domains found'
+                    print('\tNo more domains found')
                     if output_file!="":
                         output_file_handler.writelines('\tNo more domains found\n')
                     return (1)
 
 
                 # How much domains we got?
-                counter=len(final_dict.keys())
+                counter=len(list(final_dict.keys()))
 
                 logging.info('\tWe found these domains in this first search:')
                 if output_file!="":
                     output_file_handler.writelines('\tWe found these domains in this first search:\n')
-                    
+
                 for i in final_dict:
                     logging.info('\t\t{0}'.format(i))
                     if output_file!="":
@@ -1459,13 +1458,16 @@ def find_and_analyze_random_domains(domain, amount):
                         amount = amount - 1
                         if debug:
                             logging.debug('\t\tDomains analyzed so far: {0}'.format(final_dict))
-                print '3'
+                print('3')
 
 
             except Exception as inst:
-                print type(inst)     # the exception instance
-                print inst.args      # arguments stored in .args
-                print inst           # __str__ allows args to printed directly
+                print(type(inst))    # the exception instance
+                print(inst.args)     # arguments stored in .args
+                print(inst)          # __str__ allows args to printed directly
+                x, y = inst          # __getitem__ allows args to be unpacked directly
+                print('x =', x)
+                print('y =', y)
 
             except IOError:
                 logging.error('\t> Can\'t connect to Google Web! maybe the page number {0} does not exist?'.format(page_counter_web))
@@ -1475,16 +1477,19 @@ def find_and_analyze_random_domains(domain, amount):
 
 
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to printed directly
+        x, y = inst          # __getitem__ allows args to be unpacked directly
+        print('x =', x)
+        print('y =', y)
 
 
 
 
 def check_domain_emails(domain):
     """
-    This function implements the goog-mail.py program that was once included in backtrack 2. We don't know who the author was but we thanks him/her and 
+    This function implements the goog-mail.py program that was once included in backtrack 2. We don't know who the author was but we thanks him/her and
     we give him/her the credit for it
     """
     global debug
@@ -1504,11 +1509,9 @@ def check_domain_emails(domain):
                     finished = 0
         return text
     try:
-        import string
-        import httplib
-        import urllib2
+        from urllib import request
         import re
-        print '\n\tSearching for {0} emails in Google'.format(domain)
+        print(f'\n\tSearching for {domain} emails in Google')
         if output_file!="":
             output_file_handler.writelines('\n\tSearching for {0} emails in Google\n'.format(domain))
         d={}
@@ -1516,14 +1519,14 @@ def check_domain_emails(domain):
         try:
             while page_counter < 50 :
                 results = 'http://groups.google.com/groups?q='+str(domain)+'&hl=en&lr=&ie=UTF-8&start=' + repr(page_counter) + '&sa=N'
-                request = urllib2.Request(results)
-                request.add_header('User-Agent','Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)')
-                opener = urllib2.build_opener()
-                text = opener.open(request).read()
-                emails = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
+                request_groups = request.Request(bytes(results, encoding='utf-8'))
+                request_groups.add_header(b'User-Agent','Mozilla/4.0 (compatible; MSIE 5.5; Windows NT 5.0)')
+                opener = request.build_opener()
+                text = opener.open(request_groups).read()
+                emails = (re.findall(bytes('([\w\.\-]+@'+domain+')', encoding='utf-8'), StripTags(text)))
                 for email in emails:
                     d[email]=1
-                    uniq_emails=d.keys()
+                    uniq_emails = list(d.keys())
                 page_counter = page_counter + 10
         except IOError:
             logging.debug("\t> Can't connect to Google Groups!"+"")
@@ -1531,18 +1534,18 @@ def check_domain_emails(domain):
         try:
             while page_counter_web < 50 :
                 results_web = 'http://www.google.com/search?q=%40'+str(domain)+'&hl=en&lr=&ie=UTF-8&start='+ repr(page_counter_web) + '&sa=N'
-                request_web = urllib2.Request(results_web)
-                request_web.add_header('User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
-                opener_web = urllib2.build_opener()
+                request_web = request.Request(bytes(results_web, encoding='utf-8'))
+                request_web.add_header(b'User-Agent','Mozilla/4.0 (compatible;MSIE 5.5; Windows NT 5.0)')
+                opener_web = request.build_opener()
                 text = opener_web.open(request_web).read()
-                emails_web = (re.findall('([\w\.\-]+@'+domain+')',StripTags(text)))
+                emails_web = (re.findall(bytes('([\w\.\-]+@'+domain+')', encoding='utf-8'), StripTags(text)))
                 for email_web in emails_web:
                     d[email_web]=1
-                    uniq_emails_web=d.keys()
+                    uniq_emails_web = list(d.keys())
                 page_counter_web = page_counter_web + 10
         except IOError:
             logging.debug("\t> Can't connect to Google Web!"+"")
-        for uniq_emails_web in d.keys():
+        for uniq_emails_web in list(d.keys()):
             # Just adds a warning if the emails is more thatn 20 characters long. Not in the original goog-mail.py
             if len(uniq_emails_web.split('@')[0]) >= 20:
                 uniq_emails_web_temp=uniq_emails_web
@@ -1564,16 +1567,16 @@ def check_domain_emails(domain):
             a=copy.deepcopy(domain_registry)
             domain_data['DomainInfo']=a
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
+        print(type(inst))     # the exception instance
+        print(inst.args)      # arguments stored in .args
+        print(inst)           # __str__ allows args to printed directly
         x, y = inst          # __getitem__ allows args to be unpacked directly
-        print 'x =', x
-        print 'y =', y
+        print('x =', x)
+        print('y =', y)
     except KeyboardInterrupt:
         try:
             # CTRL-C pretty handling.
-            print "Keyboard Interruption!. Skiping the mail check step. Press CTRL-C again to exit."
+            print("Keyboard Interruption!. Skiping the mail check step. Press CTRL-C again to exit.")
             time.sleep(1)
             return (2)
         except KeyboardInterrupt:
@@ -1590,7 +1593,7 @@ def check_active_host():
     global output_file_handler
     global ignore_host_pattern
     hostup={}
-    print '\n\tChecking {0} active hosts using nmap... (nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sn)'.format(len(domain_data['IpsInfo']))
+    print(f'\n\tChecking {len(domain_data["IpsInfo"])} active hosts using nmap... (nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sn)')
     if output_file!="":
         output_file_handler.writelines('\n\tChecking {0} active hosts using nmap... (nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason <ip> -oA <output_directory>/nmap/<ip>.sn)\n'.format(len(domain_data['IpsInfo'])))
     try:
@@ -1601,13 +1604,13 @@ def check_active_host():
             reason=""
             # If any of the host names has the 'ignored' pattern, do not check it!
             if ignore_host_pattern:
-                for dict in ip_registry:
-                    for i in dict.keys():
+                for ip_dict in ip_registry:
+                    for i in list(ip_dict.keys()):
                         if i == 'HostName':
                             for pattern in ignore_host_pattern.split(','):
-                                if pattern in dict['HostName']:
+                                if pattern in ip_dict['HostName']:
                                     ignore=True
-                                    print'\t\tPattern: {0}, Hostname: {1}. Ignoring!'.format(pattern,dict['HostName'])
+                                    print(f'\t\tPattern: {pattern}, Hostname: {ip_dict["HostName"]}. Ignoring!')
                                     break
             if not ignore:
                 # If no output directory was selected, do not store nmap output
@@ -1620,10 +1623,17 @@ def check_active_host():
                         pass
                     nmap_command_temp = 'nmap -sn -n -v -PP -PM -PS80,25 -PA -PY -PU53,40125 -PE --reason '+ip+' -oA '+output_directory+'/nmap/'+ip+'.sn'
                 nmap_command=shlex.split(nmap_command_temp)
-                nmap_result=Popen(nmap_command, stdout=PIPE).communicate()[0]
+                nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
+                nmap_result_raw = nmap_result_pipes[0]
+                nmap_result_raw_stderr = nmap_result_pipes[1]
+                if b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                    print('\tNmap seems to need root for better results')
+                    #print(f'\t\t{nmap_result_raw_stderr}')
+
+                nmap_result = nmap_result_raw.decode()
                 if nmap_result.find('Host is up, received')!=-1:
-                    reason=nmap_result.split('received ')[1].split(' (')[0]
-                    hostup['HostUp']='True ('+reason+')'
+                    reason = nmap_result.split('received ')[1].split(' (')[0]
+                    hostup['HostUp'] = 'True ('+reason+')'
                     ip_registry.append(hostup)
                     # We store it in the main dictionary
                     a=[]
@@ -1639,20 +1649,20 @@ def check_active_host():
                     a=[]
                     a=copy.deepcopy(ip_registry)
                     domain_data['IpsInfo'][ip]=a
-                    print '\t\tHost {0} is down'.format(ip)
+                    print(f'\t\tHost {ip} is down')
                     if output_file!="":
                         output_file_handler.writelines('\t\tHost {0} is down\n'.format(ip))
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
+        print(type(inst))     # the exception instance
+        print(inst.args)      # arguments stored in .args
+        print(inst)           # __str__ allows args to printed directly
         x, y = inst          # __getitem__ allows args to be unpacked directly
-        print 'x =', x
-        print 'y =', y
+        print('x =', x)
+        print('y =', y)
     except KeyboardInterrupt:
         try:
             # CTRL-C pretty handling.
-            print "Keyboard Interruption!. Skiping the active hosts test step. Press CTRL-C again to exit."
+            print("Keyboard Interruption!. Skiping the active hosts test step. Press CTRL-C again to exit.")
             time.sleep(1)
             return (2)
         except KeyboardInterrupt:
@@ -1671,7 +1681,7 @@ def host_info(domain):
     global zenmap
     global output_file
     global output_file_handler
-    print '\n\tChecking ports on every active host using nmap... (nmap '+nmap_scantype+' <ip> -oA <output_directory>/nmap/<ip>)'
+    print(f'\n\tChecking ports on every active host using nmap... (nmap {nmap_scantype} <ip> -oA <output_directory>/nmap/<ip>)')
     if output_file!="":
         output_file_handler.writelines('\n\tChecking ports on every active host using nmap... (nmap '+nmap_scantype+'  <ip> -oA <output_directory>/nmap/<ip>)\n')
     try:
@@ -1687,21 +1697,21 @@ def host_info(domain):
             try:
                 # First read the variables...
                 for dicts in ip_registry:
-                    if dicts.has_key('PTR'):
+                    if dicts.__contains__('PTR'):
                         host_name_temp=dicts.get('PTR')
                         host_name=host_name_temp+' (PTR)'
-                    elif dicts.has_key('HostName'):
+                    elif dicts.__contains__('HostName'):
                         host_name=dicts.get('HostName')
-                    if dicts.has_key('HostUp'):
+                    if dicts.__contains__('HostUp'):
                         # Only scan active hosts
                         if 'True' in dicts['HostUp']:
-                            print '\t\tScanning ip {0} ({1}):'.format(ip,host_name)
+                            print(f'\t\tScanning ip {ip} ({host_name}):')
                             if output_file!="":
                                 output_file_handler.writelines('\t\tScanning ip {0} ({1}):\n'.format(ip,host_name))
 
                             # If no output directory was selected, do not store nmap output
                             if output_directory==False or not_store_nmap == 1:
-                                    nmap_command_temp='nmap '+nmap_scantype+' ' + ip 
+                                    nmap_command_temp='nmap '+nmap_scantype+' ' + ip
                             else:
                                 try:
                                     os.mkdir(output_directory+'/nmap')
@@ -1709,14 +1719,21 @@ def host_info(domain):
                                     nmap_command_temp='nmap '+nmap_scantype+' ' + ip + ' -oA '+output_directory+'/nmap/'+ip
                             # Do the nmap
                             nmap_command=shlex.split(nmap_command_temp)
-                            nmap_result_raw=Popen(nmap_command, stdout=PIPE).communicate()[0]
-                            nmap_result=nmap_result_raw.split('\n')
+                            nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
+                            nmap_result_raw = nmap_result_pipes[0]
+                            nmap_result_raw_stderr = nmap_result_pipes[1]
+                            if b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                                print('\t\tNmap seems to need root for better results')
+                                #print(f'\t\t{nmap_result_raw_stderr}')
+
+                            nmap_result = nmap_result_raw.split(b'\n')
                             #
                             # Now analyze nmaps output
                             # Searching for ports, service and scripts info
                             starttoread_port_section=0
                             starttoread_traceroute_section=0
                             for line in nmap_result:
+                                line = line.decode()
                                 # Learning port information
                                 # If we find the PORT word, we can start to analyze ports...
                                 if line.find('PORT') != -1:
@@ -1739,10 +1756,10 @@ def host_info(domain):
                                             logging.warning('\t\t\t{0}'.format(line))
                                         if output_file!="":
                                             output_file_handler.writelines('\t\t\t{0}\n'.format(line))
-                                        # Store the port info 
+                                        # Store the port info
                                         hostports['PortInfo']=line
                                         b={}
-                                        b=copy.deepcopy(hostports)    
+                                        b=copy.deepcopy(hostports)
                                         ip_registry.append(b)
                                         # We store it in the main dictionary
                                         a=[]
@@ -1762,7 +1779,7 @@ def host_info(domain):
                                                 output_file_handler.writelines('\t\t\t\t{0}\n'.format(line))
                                         scriptinfo['ScriptInfo']=line
                                         b={}
-                                        b=copy.deepcopy(scriptinfo)    
+                                        b=copy.deepcopy(scriptinfo)
                                         ip_registry.append(b)
                                         # We store it in the main dictionary
                                         a=[]
@@ -1775,7 +1792,7 @@ def host_info(domain):
                                         output_file_handler.writelines('\t\t\tOS Info: {0}\n'.format(line))
                                     hostos['OsInfo']=line.split('Service Info:')[1]
                                     b={}
-                                    b=copy.deepcopy(hostos)    
+                                    b=copy.deepcopy(hostos)
                                     ip_registry.append(b)
                                     # We store it in the main dictionary
                                     a=copy.deepcopy(ip_registry)
@@ -1795,29 +1812,29 @@ def host_info(domain):
             except KeyboardInterrupt:
                 try:
                     # CTRL-C pretty handling.
-                    print "Keyboard Interruption!. Skiping this IP, going to the next.... Press CTRL-C again to move to the next check."
+                    print("Keyboard Interruption!. Skiping this IP, going to the next.... Press CTRL-C again to move to the next check.")
                     time.sleep(1)
                     continue
                 except KeyboardInterrupt:
                     try:
                         # CTRL-C pretty handling.
-                        print "Keyboard Interruption!. Skiping port scanning section. Press CTRL-C again to exit."
+                        print("Keyboard Interruption!. Skiping port scanning section. Press CTRL-C again to exit.")
                         time.sleep(1)
                         return(1)
                     except KeyboardInterrupt:
                         sys.exit(1)
-        # End for    
+        # End for
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
+        print(type(inst))     # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)           # __str__ allows args to printed directly
         x, y = inst          # __getitem__ allows args to be unpacked directly
-        print 'x =', x
-        print 'y =', y
+        print('x =', x)
+        print('y =', y)
     except KeyboardInterrupt:
         try:
             # CTRL-C pretty handling.
-            print "Keyboard Interruption!. Skiping the port scanning step. Press CTRL-C again to exit."
+            print("Keyboard Interruption!. Skiping the port scanning step. Press CTRL-C again to exit.")
             time.sleep(1)
             return (2)
 
@@ -1825,7 +1842,7 @@ def host_info(domain):
             sys.exit(1)
 
 def tt():
-    print "               !         !              \n              ! !       ! !              \n             ! . !     ! . !              \n                ^^^^^^^^^ ^                \n              ^             ^              \n            ^  (0)       (0)  ^           \n           ^        ""         ^           \n          ^   ***************    ^         \n        ^   *                 *   ^        \n       ^   *   /\   /\   /\    *    ^       \n      ^   *                     *    ^    \n     ^   *   /\   /\   /\   /\   *    ^    \n    ^   *                         *    ^    \n    ^  *                           *   ^    \n    ^  *                           *   ^    \n     ^ *                           *  ^     \n      ^*                           * ^     \n       ^ *                        * ^    \n       ^  *                      *  ^    \n         ^  *       ) (         * ^    \n             ^^^^^^^^ ^^^^^^^^^             \n                   Totoro              \n" 
+    print("               !         !              \n              ! !       ! !              \n             ! . !     ! . !              \n                ^^^^^^^^^ ^                \n              ^             ^              \n            ^  (0)       (0)  ^           \n           ^        ""         ^           \n          ^   ***************    ^         \n        ^   *                 *   ^        \n       ^   *   /\   /\   /\    *    ^       \n      ^   *                     *    ^    \n     ^   *   /\   /\   /\   /\   *    ^    \n    ^   *                         *    ^    \n    ^  *                           *   ^    \n    ^  *                           *   ^    \n     ^ *                           *  ^     \n      ^*                           * ^     \n       ^ *                        * ^    \n       ^  *                      *  ^    \n         ^  *       ) (         * ^    \n             ^^^^^^^^ ^^^^^^^^^             \n                   Totoro              \n")
 
 def printout(domain,ip,option):
     """
@@ -1839,39 +1856,39 @@ def printout(domain,ip,option):
     global output_file_handler
     ip_vect=[]
     try:
-        
+
         # If option = 1 we print all the data extracted
         if option==1:
             logging.debug('--Finished--')
             logging.info('Summary information for domain '+domain)
             logging.info('-----------------------------------------')
 
-            # We store information for statistics 
+            # We store information for statistics
 
             if output_directory!=False:
                 output_file_handler.writelines('\n\n--Finished--\n')
                 output_file_handler.writelines('Summary information for domain '+domain+'\n')
                 output_file_handler.writelines('-----------------------------------------\n')
-            
+
             # Print information for the domain first
             if len(domain_data['DomainInfo'])!=0:
 
-                print '\tDomain Specific Information:'
+                print('\tDomain Specific Information:')
                 if output_file!="":
                     output_file_handler.writelines('\tDomain Specific Information:\n')
 
                 for domdata in domain_data['DomainInfo']:
                     # We print the emails found for this domain
-                    if domdata.has_key('Email'):
+                    if domdata.__contains__('Email'):
                         logging.warning('\t\tEmail: {0}'.format(domdata['Email']))
                         if output_file!="":
                             output_file_handler.writelines('\t\tEmail: {0}\n'.format(domdata.get('Email')))
 
 
-            print '\n\tDomain Ips Information:'
+            print('\n\tDomain Ips Information:')
             if output_file!="":
                 output_file_handler.writelines('\n\tDomain Ips Information:\n')
-        
+
 
             # For each IP in the main dictionary
             for ip in domain_data['IpsInfo']:
@@ -1883,40 +1900,40 @@ def printout(domain,ip,option):
                     output_file_handler.writelines('\t\tIP: {0}\n'.format(ip))
                 # These things are many times for ip
                 for dicts in ip_vect:
-                    if dicts.has_key('PTR'):
+                    if dicts.__contains__('PTR'):
                         if dicts.get('PTR') != hostname:
                             logging.warning('\t\t\tHostName: {0}\t\t\tType: PTR'.format(dicts.get('PTR')))
                             if output_file!="":
                                 output_file_handler.writelines('\t\t\tHostName: {0}\t\t\tType: PTR\n'.format(dicts.get('PTR')))
                         else:
-                            print '\t\t\tHostName: {0}\t\t\tType: PTR'.format(dicts.get('PTR'))
+                            print(f'\t\t\tHostName: {dicts.get("PTR")}\t\t\tType: PTR')
                             if output_file!="":
                                 output_file_handler.writelines('\t\t\tHostName: {0}\t\t\tType: PTR\n'.format(dicts.get('PTR')))
-                    if dicts.has_key('HostName'):
-                        print '\t\t\tHostName: {0}'.format(dicts.get('HostName')),
+                    if dicts.__contains__('HostName'):
+                        print(f'\t\t\tHostName: {dicts.get("HostName")}'),
                         hostname=dicts.get('HostName')
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tHostName: {0}'.format(dicts.get('HostName')))
-                    if dicts.has_key('Type'):
-                        print '\t\t\tType: {0}'.format(dicts.get('Type'))
+                    if dicts.__contains__('Type'):
+                        print(f'\t\t\tType: {dicts.get("Type")}')
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tType: {0}\n'.format(dicts.get('Type')))
-                    if dicts.has_key('SubDomain'):
+                    if dicts.__contains__('SubDomain'):
                         logging.error('\t\t\tSub Domain: {0}'.format(dicts['SubDomain']))
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tSub Domain: {0}\n'.format(dicts.get('SubDomain')))
 
                 # These things are just once for ip
                 for dicts in ip_vect:
-                    if dicts.has_key('IpCountry'):
+                    if dicts.__contains__('IpCountry'):
                         logging.info('\t\t\tCountry: {0}'.format(dicts.get('IpCountry')))
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tCountry: {0}\n'.format(dicts.get('IpCountry')))
-                    if dicts.has_key('HostUp'):
-                        logging.info('\t\t\tIs Active: {0}'.format(dicts.get('HostUp')))
+                    if dicts.__contains__('HostUp'):
+                        logging.warning('\t\t\tIs Active: {0}'.format(dicts.get('HostUp')))
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tIs Active: {0}\n'.format(dicts.get('HostUp')))
-                    if dicts.has_key('PortInfo'):
+                    if dicts.__contains__('PortInfo'):
                         # Try to find critical ports
                         critical=True
                         for cport in normal_port_list:
@@ -1932,35 +1949,35 @@ def printout(domain,ip,option):
                             if output_file!="":
                                 output_file_handler.writelines('\t\t\tPort: {0}\n'.format(dicts.get('PortInfo')))
 
-                    if dicts.has_key('ScriptInfo'):
-                        print '\t\t\t\tScript Info: {0}'.format(dicts.get('ScriptInfo'))
+                    if dicts.__contains__('ScriptInfo'):
+                        print(f'\t\t\t\tScript Info: {dicts.get("ScriptInfo")}')
                         if output_file!="":
                             output_file_handler.writelines('\t\t\t\tScript Info: {0}\n'.format(dicts.get('ScriptInfo')))
 
-                    if dicts.has_key('OsInfo'):
-                        print '\t\t\tOs Info: {0}'.format(dicts.get('OsInfo'))
+                    if dicts.__contains__('OsInfo'):
+                        print(f'\t\t\tOs Info: {dicts.get("OsInfo")}')
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tOs Info: {0}\n'.format(dicts.get('OsInfo')))
-                    if dicts.has_key('ZT'):
+                    if dicts.__contains__('ZT'):
                         logging.critical('\t\t\tZone Transfer: {0}'.format(dicts.get('ZT')))
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tZone Transfer: {0}\n'.format(dicts.get('ZT')))
-                    if dicts.has_key('DirIndex'):
+                    if dicts.__contains__('DirIndex'):
                         logging.critical('\t\t\tOpen Folders: {0}'.format(dicts.get('DirIndex')))
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tOpen Folders: {0}\n'.format(dicts.get('DirIndex')))
-            print
+            print()
             logging.info('--------------End Summary --------------')
             logging.info('-----------------------------------------')
             if output_directory!=False:
                 output_file_handler.writelines('\n--------------End Summary --------------\n')
                 output_file_handler.writelines('-----------------------------------------\n')
-            print '\n'
+            print('\n')
             if output_file != "":
                 output_file_handler.writelines('\n')
             if output_file != "" and create_pdf != False:
                 try:
-                    print '\tCreating pdf file from {0} text output '.format(output_file)
+                    print(f'\tCreating pdf file from {output_file} text output ')
                     os.system('/usr/bin/pyText2pdf.py ' + output_file)
                 except OSError:
                     logging.warning('Warning! pyText2pdf.py not found. Please download from http://code.activestate.com/recipes/532908-text-to-pdf-converter-rewrite/download/1/')
@@ -1971,48 +1988,48 @@ def printout(domain,ip,option):
             # Things that are once per IP
             if countrys:
                 for dicts in ip_vect:
-                    if dicts.has_key('IpCountry'):
+                    if dicts.__contains__('IpCountry'):
                         country=dicts.get('IpCountry')
-    
-                logging.info('\t\tIP: {0} ({1})'.format(ip,country))
+
+                logging.debug('\t\tIP: {0} ({1})'.format(ip,country))
                 if output_file!="":
                     output_file_handler.writelines('\t\tIP: {0} ({1})\n'.format(ip,country))
             # Things that are multiple times per IP
             hostname=""
             for dicts in ip_vect:
-                if dicts.has_key('PTR'):
+                if dicts.__contains__('PTR'):
                     if dicts.get('PTR') != hostname:
                         logging.warning('\t\t\tHostName: {0}\t\t\tType: PTR'.format(dicts.get('PTR')))
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tHostName: {0}\t\t\tType: PTR\n'.format(dicts.get('PTR')))
                     else:
-                        print '\t\t\tHostName: {0}\t\t\tType: PTR'.format(dicts.get('PTR'))
+                        print(f'\t\t\tHostName: {dicts.get("PTR")}\t\t\tType: PTR')
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tHostName: {0}\t\t\tType: PTR\n'.format(dicts.get('PTR')))
-                if dicts.has_key('Type'):
-                    print '\t\t\tType: {0}'.format(dicts.get('Type'))
+                if dicts.__contains__('Type'):
+                    print(f'\t\t\tType: {dicts.get("Type")}')
                     if output_file!="":
                         output_file_handler.writelines('\t\t\tType: {0}\n'.format(dicts.get('Type')))
-                if dicts.has_key('HostName'):
+                if dicts.__contains__('HostName'):
                     hostname=dicts.get('HostName')
-                    print '\t\t\tHostName: {0}'.format(dicts.get('HostName')),
+                    print(f'\t\t\tHostName: {dicts.get("HostName")}'),
                     if output_file!="":
                         output_file_handler.writelines('\t\t\tHostName: {0}'.format(dicts.get('HostName')))
-                if dicts.has_key('SubDomain'):
+                if dicts.__contains__('SubDomain'):
                     logging.error('\t\t\tSub Domain: {0} <- New Subdomain!'.format(dicts['SubDomain']))
                     if output_file!="":
                         output_file_handler.writelines('\t\t\tSub Domain: {0} <- New Subdomain!\n'.format(dicts['SubDomain']))
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to printed directly
         x, y = inst          # __getitem__ allows args to be unpacked directly
-        print 'x =', x
-        print 'y =', y
+        print('x =', x)
+        print('y =', y)
     except KeyboardInterrupt:
         try:
             # CTRL-C pretty handling.
-            print "Keyboard Interruption!. Skiping printout step. Press CTRL-C again to exit."
+            print("Keyboard Interruption!. Skiping printout step. Press CTRL-C again to exit.")
             time.sleep(1)
             return (2)
         except KeyboardInterrupt:
@@ -2056,7 +2073,7 @@ def analyze_domain(domain):
                     return 0
             # First check if the hostname given is in fact a domain...
             try:
-                print '\tChecking if the hostname {0} given is in fact a domain...'.format(domain)
+                print(f'\tChecking if the hostname {domain} given is in fact a domain...')
 
                 # If a host has a NS for its own, then we think its a domain
                 if debug:
@@ -2065,9 +2082,9 @@ def analyze_domain(domain):
             except:
                 logging.error('\tThe given name doesn\'t seem to be a domain since there are no NS servers assigned to it. Stopping.')
                 logging.error('\tThe dnspython library in macos can not find domains such as com. It is a bug in the library. Linux can.\n')
-                return -1 
+                return -1
             # Now we are sure its a domain!
-            print
+            print()
             logging.debug('Analyzing domain: {0}'.format(domain))
             # If an output directory was selected, we create an output file...
             if output_directory!=False:
@@ -2124,7 +2141,7 @@ def analyze_domain(domain):
                             print('There was an error creating the xml folder for storing the files for zenmap. Trying to continue.')
                     elif output_directory == False:
                         logging.debug('\tTo use zenmap you must specify an output directory and store nmap output files.')
-                    # Do it more generic so other systems can use zenmap 
+                    # Do it more generic so other systems can use zenmap
                     command_line = zenmap_command + ' ' + output_directory + '/nmap/xml'
                     args = shlex.split(command_line)
                     Popen(args)
@@ -2133,11 +2150,11 @@ def analyze_domain(domain):
                     logging.warning('Are you sure do you want to send an email with the report to every email address found in the domain??? ( No / Yes, I want )')
                     if output_file!="":
                         output_file_handler.writelines('Are you sure do you want to send an email with the report to every email address found in the domain??? ( No / Yes, I want )\n')
-                    text2 = raw_input()
+                    text2 = input()
                     if text2 == 'Yes, I want':
                         robin_hood_send()
                     else:
-                        print '... mmm I though so...'
+                        print('... mmm I though so...')
                 # If robtex domains were activated, search for them!
                 if robtex_domains or all_robtex:
                     find_robtex_domains()
@@ -2146,12 +2163,12 @@ def analyze_domain(domain):
                 output_file_handler.close()
                 output_file_handler=False
         except Exception as inst:
-            print type(inst)     # the exception instance
-            print inst.args      # arguments stored in .args
-            print inst           # __str__ allows args to printed directly
+            print(type(inst))    # the exception instance
+            print(inst.args)     # arguments stored in .args
+            print(inst)          # __str__ allows args to printed directly
             x, y = inst          # __getitem__ allows args to be unpacked directly
-            print 'x =', x
-            print 'y =', y
+            print('x =', x)
+            print('y =', y)
 
 
 def find_robtex_domains():
@@ -2168,15 +2185,12 @@ def find_robtex_domains():
     global robtex_domains
     try:
 
-        import string
-        import httplib
-        import urllib2
+        from urllib import request
         import re
-        import random
 
         # This is not working: domain_analyzer_v0.5.py -d law.edu.ru -o law.edu.ru -b -a -n -g -v "in-addr.arpa" -D
 
-        print 'Finding new unrelated domains to analyze with robtex.'
+        print('Finding new unrelated domains to analyze with robtex.')
         if output_directory!=False:
             output_file_handler.writelines('Finding new unrelated domains to analyze with robtex.\n')
 
@@ -2186,24 +2200,24 @@ def find_robtex_domains():
 
             if robtex_domains or all_robtex:
                 for dicts in ip_vect:
-                    if dicts.has_key('HostName'):
+                    if dicts.__contains__('HostName'):
                         hostname=dicts['HostName']
-                    if dicts.has_key('ZT'):
-                        # Now we store the dns server in the list (for recursion) but avoid repiting! 
+                    if dicts.__contains__('ZT'):
+                        # Now we store the dns server in the list (for recursion) but avoid repiting!
                         # We use the IP because a lot of dns has several different names.
-                        if not ns_servers_to_robtex.has_key(ip):
-                            ns_servers_to_robtex[ip]=hostname        
+                        if not ns_servers_to_robtex.__contains__(ip):
+                            ns_servers_to_robtex[ip]=hostname
                             if debug:
                                 logging.debug('\tName server {0} ({1}) was added to be checked with robtex.'.format(ip, hostname))
             elif all_robtex:
                 for dicts in ip_vect:
-                    if dicts.has_key('HostName'):
+                    if dicts.__contains__('HostName'):
                         hostname=dicts['HostName']
-                    if dicts.has_key('NS'):
-                        # Now we store the dns server in the list (for recursion) but avoid repiting! 
+                    if dicts.__contains__('NS'):
+                        # Now we store the dns server in the list (for recursion) but avoid repiting!
                         # We use the IP because a lot of dns has several different names.
-                        if not ns_servers_to_robtex.has_key(ip):
-                            ns_servers_to_robtex[ip]=hostname        
+                        if not ns_servers_to_robtex.__contains__(ip):
+                            ns_servers_to_robtex[ip]=hostname
                             if debug:
                                 logging.debug('\tName server {0} ({1}) was added to be checked with robtex.'.format(ip, hostname))
 
@@ -2220,23 +2234,23 @@ def find_robtex_domains():
 
                 # For each DNS server ask robtex unrelated domains with the same DNS
                 results_web = 'http://www.robtex.com/dns/'+ hostname +'.html'
-                request_web = urllib2.Request(results_web)
-                request_web.add_header('User-Agent','Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.205 Safari/534.16')
-                opener_web = urllib2.build_opener()
+                request_web = request.Request(bytes(results_web, encoding='utf-8'))
+                request_web.add_header(b'User-Agent','Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.205 Safari/534.16')
+                opener_web = request.build_opener()
                 try:
                     text = opener_web.open(request_web).read()
                 except:
-                    print 'Sorry, www.robtex.com timed out' 
+                    print('Sorry, www.robtex.com timed out')
 
 
                 # This is because the dictionary can grow recursively, so every time we check a dns server, we mark it as checked
                 ns_servers_to_robtex[ip]=False
 
-                # Here we should extract the unrelated domains 
+                # Here we should extract the unrelated domains
                 try:
                     #text2=text.split('<span id="sharedns">')[1].split('</div>')[0].split(')')[1]
                     text2=text.split('id="dns1"')[1].split('<div class="div4">')[0].split(')')[1]
-                    temp_domains = re.findall('(href="\w[\w\.\-]+\.html")',text2)
+                    temp_domains = re.findall(bytes('(href="\w[\w\.\-]+\.html")', encoding='utf-8'), text2)
 
                     logging.info('\tWe found {0} more domains:'.format(len(temp_domains)))
                     if output_directory!=False:
@@ -2256,15 +2270,18 @@ def find_robtex_domains():
                             # If the domain wasn't there, append it
                             if debug:
                                 logging.debug('\t\t> Adding domain {0}'.format(unrelated_domain))
-                            print '\t\t{0}'.format(unrelated_domain)
+                            print(f'\t\t{unrelated_domain}')
                             if output_file!="":
                                 output_file_handler.writelines('\t\t{0}'.format(unrelated_domain))
                             domains_still_to_analyze.append(unrelated_domain)
                             pass
                         except Exception as inst:
-                            print type(inst)     # the exception instance
-                            print inst.args      # arguments stored in .args
-                            print inst           # __str__ allows args to printed directly
+                            print(type(inst))    # the exception instance
+                            print(inst.args)     # arguments stored in .args
+                            print(inst)          # __str__ allows args to printed directly
+                            x, y = inst          # __getitem__ allows args to be unpacked directly
+                            print('x =', x)
+                            print('y =', y)
 
                 except:
                     logging.info('\t\tNo more domains found in robtex')
@@ -2274,16 +2291,16 @@ def find_robtex_domains():
 
 
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to printed directly
         x, y = inst          # __getitem__ allows args to be unpacked directly
-        print 'x =', x
-        print 'y =', y
+        print('x =', x)
+        print('y =', y)
     except KeyboardInterrupt:
         try:
             # CTRL-C pretty handling.
-            print "Keyboard Interruption!. Skiping robtex step. Press CTRL-C again to exit."
+            print("Keyboard Interruption!. Skiping robtex step. Press CTRL-C again to exit.")
             time.sleep(1)
             return (2)
 
@@ -2312,7 +2329,7 @@ def robin_hood_send():
                 ip_registry=domain_data['IpsInfo'][ip]
 
                 if debug:
-                    print '\t> For IP : {0}'.format(ip)
+                    print(f'\t> For IP : {ip}')
                 # We extract its vector
                 ip_vect=domain_data['IpsInfo'][ip]
 
@@ -2320,7 +2337,7 @@ def robin_hood_send():
                 # First we search for every MX type!
                 temp_host_name_to_crawl=[]
                 for dicts in ip_vect:
-                    if dicts.has_key('Type'):
+                    if dicts.__contains__('Type'):
                         # Store last domain for this IP
                         if 'MX' in dicts['Type']:
                             mail_server=dicts.get('Type')
@@ -2355,9 +2372,12 @@ def robin_hood_send():
 
 
         except Exception as inst:
-            print type(inst)     # the exception instance
-            print inst.args      # arguments stored in .args
-            print inst           # __str__ allows args to printed directly
+            print(type(inst))    # the exception instance
+            print(inst.args)     # arguments stored in .args
+            print(inst)          # __str__ allows args to printed directly
+            x, y = inst          # __getitem__ allows args to be unpacked directly
+            print('x =', x)
+            print('y =', y)
 
 
 
@@ -2382,7 +2402,7 @@ def web_crawl_domain():
             # We should try to crawl every website (in its correct port) on every host. And perhaps we have to try to crawl it using its
             # IP address if the host name does not work
 
-            print '\tWebCrawling domain\'s web servers... up to {0} max links.'.format(max_amount_to_crawl)
+            print(f'\tWebCrawling domain\'s web servers... up to {max_amount_to_crawl} max links.')
             if output_file!="":
                 output_file_handler.writelines('\tWebCrawling domain\'s web servers... up to {0} max links.\n'.format(max_amount_to_crawl))
 
@@ -2401,7 +2421,7 @@ def web_crawl_domain():
                 ip_registry=domain_data['IpsInfo'][ip]
 
                 if debug:
-                    print '\t> For IP : {0}'.format(ip)
+                    print(f'\t> For IP : {ip}')
                 # We extract its vector
                 ip_vect=domain_data['IpsInfo'][ip]
 
@@ -2409,7 +2429,7 @@ def web_crawl_domain():
                 # First we search for every hostname!
                 temp_host_name_to_crawl=[]
                 for dicts in ip_vect:
-                    if dicts.has_key('HostName'):
+                    if dicts.__contains__('HostName'):
                         # Store last domain for this IP
                         temp_host_name_to_crawl.append(dicts.get('HostName'))
                         if debug:
@@ -2424,7 +2444,7 @@ def web_crawl_domain():
                 crawler_results=[]
                 # Now look for web ports in these hostnames
                 for moredicts in ip_vect:
-                    if moredicts.has_key('PortInfo'):
+                    if moredicts.__contains__('PortInfo'):
                         temp_port_info= moredicts.get('PortInfo')
                         # Find only web ports
                         if temp_port_info.find('http') != -1 and temp_port_info.find('?')==-1:
@@ -2444,7 +2464,7 @@ def web_crawl_domain():
                                     #
                                     # Here we crawl!!!
                                     #
-                                    print
+                                    print()
                                     crawler.crawl_result=[]
                                     crawler.crawl_site(temp_host_name,max_amount_to_crawl)
 
@@ -2461,7 +2481,7 @@ def web_crawl_domain():
                                     #
                                     # Here we crawl!!!
                                     #
-                                    print
+                                    print()
                                     crawler.crawl_result=[]
                                     crawler.crawl_site(temp_host_name,max_amount_to_crawl)
 
@@ -2474,9 +2494,12 @@ def web_crawl_domain():
 
 
         except Exception as inst:
-            print type(inst)     # the exception instance
-            print inst.args      # arguments stored in .args
-            print inst           # __str__ allows args to printed directly
+            print(type(inst))    # the exception instance
+            print(inst.args)     # arguments stored in .args
+            print(inst)          # __str__ allows args to printed directly
+            x, y = inst          # __getitem__ allows args to be unpacked directly
+            print('x =', x)
+            print('y =', y)
 
 
 
@@ -2510,10 +2533,12 @@ def world_domination_check():
 
 
     except Exception as inst:
-        print type(inst)     # the exception instance
-        print inst.args      # arguments stored in .args
-        print inst           # __str__ allows args to printed directly
-
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)          # __str__ allows args to printed directly
+        x, y = inst          # __getitem__ allows args to be unpacked directly
+        print('x =', x)
+        print('y =', y)
 
 
 
@@ -2540,7 +2565,6 @@ def main():
         global max_amount_to_crawl
         global world_domination
         global countrys
-        global geoip_cache
         global colors
         global check_spf
         global amount_of_random_domains
@@ -2620,8 +2644,8 @@ def main():
                 # No zenmap
                 zenmap = False
                 print('Zenmap disabled because it was not found in the system.')
-        # Add a . to the domain name. This is to avoid somo local DNS searches, specially in macos. Where the domain can appear as non existant. 
-        # This allow us to search for TLDs such as 'com' domain. The final query is then 'com.' 
+        # Add a . to the domain name. This is to avoid somo local DNS searches, specially in macos. Where the domain can appear as non existant.
+        # This allow us to search for TLDs such as 'com' domain. The final query is then 'com.'
         # In the case of normal domains, such as, 'test.com', the query ends up being 'test.com.'
         domain += '.'
         # Control that the domain name does not start with a '.'
@@ -2650,11 +2674,10 @@ def main():
             # Do we have GeoIP?? CHECK IT WITHOUT COUNTRYS
             if countrys:
                 try:
-                    import GeoIP
-                    geoip_cache = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
+                    country=geolite2.lookup('1.1.1.1').country
                 except:
                     countrys=False
-                    logging.warning('\tWARNING!! You don\'t have GeoIP libraries. apt-get install python-geoip\n\n')
+                    logging.warning('\tWARNING!! You don\'t have GeoIP libraries. Install python-geoip-python3 and python-geoip-geolite2\n\n')
             # If selected, find N random domains and analyze them
             if amount_of_random_domains:
                 domain_list = find_and_analyze_random_domains(domain, amount_of_random_domains)
@@ -2663,7 +2686,7 @@ def main():
                 domains_still_to_analyze.append(domain)
                 # For every domain found, we analyze them
                 for unrelated_domain in domains_still_to_analyze:
-                    print
+                    print()
                     logging.info('Domains still to check: {0}'.format(len(domains_still_to_analyze)))
                     # Analyze the main domain
                     analyze_domain(unrelated_domain)
@@ -2672,13 +2695,13 @@ def main():
             # Now we will analyze each subdomain found
             if not_subdomains == False:
                 for subdomain in subdomains_found:
-                    print
+                    print()
                     analyze_domain(subdomain)
         # WORLD DOMINATION!!!!
         # We don't recomend to use world-domination and robin-hood at the same time...
         elif world_domination == True and robin_hood == False and nmap==0:
             logging.warning('WARNING! World domination mode activate!, are you sure? ( No / Yes, I\'m sure. )')
-            text = raw_input()
+            text = input()
 
             if text == 'Yes, I\'m sure.':
 
@@ -2699,12 +2722,10 @@ def main():
                 # Do we have GeoIP??
                 if countrys:
                     try:
-                        import GeoIP
-                        geoip_cache = GeoIP.new(GeoIP.GEOIP_MEMORY_CACHE)
-
+                        country=geolite2.lookup('1.1.1.1').country
                     except:
                         countrys=False
-                        logging.warning('\tWARNING! You don\'t have GeoIP libraries. apt-get install python-geoip')
+                        logging.warning('\tWARNING!! You don\'t have GeoIP libraries. Install python-geoip-python3 and python-geoip-geolite2\n\n')
 
                 # HERE
                 world_domination_check()
@@ -2714,7 +2735,7 @@ def main():
                     for subdomain in subdomains_found:
                         analyze_domain(subdomain)
             else:
-                print 'I though so...'
+                print('I though so...')
 
 
 
@@ -2729,7 +2750,7 @@ def main():
         # CTRL-C pretty handling.
         if output_directory!=False and output_file_handler:
             output_file_handler.close()
-        print "Keyboard Interruption!. Closing files and exiting."
+        print("Keyboard Interruption!. Closing files and exiting.")
         sys.exit(1)
 
 
