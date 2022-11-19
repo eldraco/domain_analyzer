@@ -1,5 +1,10 @@
 # Domain Analyzer v0.8.3
+
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/eldraco/domain_analyzer/python3.9)
+![example workflow](https://github.com/eldraco/domain_analyzer/actions/workflows/docker-image.yml/badge.svg)
 ![example workflow](https://github.com/eldraco/domain_analyzer/actions/workflows/codeql-analysis.yml/badge.svg)
+![Docker Pulls](https://img.shields.io/docker/pulls/verovaleros/domain_analyzer?color=green)
+[![Branch Maintenance](https://img.shields.io/badge/Branch%20Maintained%3F-sometimes-orange.svg)](https://bitbucket.org/lbesson/ansi-colors)
 
 ## What
 Domain analyzer is a security analysis tool that automatically discovers and reports information about a given domain. Its main purpose is to analyze domains in an unattended way.
@@ -111,7 +116,17 @@ Most of these features can be deactivated.
 
 ## Docker Image
 
-We are migrating the tool to run on Python 3, however, until a new version is released, we have created a docker image that can be used to run domain analyzer on Python 2.7, and has all the dependencies already installed.
+### Docker image
+
+Domain analyzer has now a docker image for the main version, on Python 3, with all dependencies already installed:
+
+```bash
+docker run --rm -ti verovaleros/domain_analyzer:latest /domain_analyzer/domain_analyzer.py -d <domain>
+```
+
+### Docker for Domain Analyzer on Python 2.7
+
+We have created a docker image that can be used to run domain analyzer on Python 2.7, and has all the dependencies already installed.
 
 `docker run --rm -it verovaleros/domain_analyzer:python2.7 /domain_analyzer/domain_analyzer.py -d <domain>`
 
