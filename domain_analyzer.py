@@ -400,8 +400,7 @@ def get_NS_records(domain):
                         country=geoip_cache.country_name_by_addr(ip.to_text())
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
-                        if debug:
-                            logging.debug('\t\t> Country: {0}'.format(country))
+                        logging.debug('\t\t> Country: {0}'.format(country))
 
 
                     # Obtain Ip's reverse DNS name if we don't have it
