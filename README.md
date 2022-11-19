@@ -4,6 +4,8 @@
 ## What
 Domain analyzer is a security analysis tool which automatically discovers and reports information about the given domain. Its main purpose is to analyze domains in an unattended way.
 
+If you want nmap to scan more ports and run scripts and to run the crawler on those websites, you need to be root.
+
 ## Example default options
 
 ![domainanalyzer-gif-demo](https://user-images.githubusercontent.com/2458879/152254361-a923d460-660a-4695-9453-9e7d8142b109.gif)
@@ -104,15 +106,7 @@ Current version is 0.8 and the main features are:
 
 Most of these features can be deactivated.
 
-## Installation
-Just untar the .tar.gz file and copy the python files to the /usr/bin/ directory. Domain_analyzer needs to be run as root. The crawler can be run as a non-privileged user.
-If you want all the features (web crawler, pdf and colors), which is nice, also copy these files to /usr/bin or /usr/local/bin
 
-- ansistrm.py
-- crawler.py
-- pyText2pdf.py
-
-If you have any issues with the GeoIP database, please download it from its original source [here](http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz). And install it in where your system needs it, usually at /opt/local/share/GeoIP/GeoIP.dat
 
 ## Docker Image
 
@@ -139,22 +133,7 @@ Domain analyzer was born on Feb 4th, 2011. You can check the original repository
 If you have any question, please send us an email! They are in the python files.
 
 ## Installation
-Just untar the .tar.gz file and copy the python files to the /usr/bin/ directory. Domain_analyzer needs to be run as root. The crawler can be run as a non-privileged user.
-If you want all the features (web crawler, pdf and colors), which is nice, also copy these files to /usr/bin or /usr/local/bin
 
-- ansistrm.py
-- crawler.py
-- pyText2pdf.py
+    git clone https://github.com/eldraco/domain_analyzer.git
+    pip install -r requirements.txt
 
-If you have any issues with the GeoIP database, please download it from its original source [here](http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz). And install it in where your system needs it, usually at /opt/local/share/GeoIP/GeoIP.dat
-# Tofix
-
-sudo ./domain_analyzer.py -d cr -k 5 -s -g -p -a
-    Finding 5 pseudo-random sub-domains to analyze in the cr. domain.
-<class 'urllib2.HTTPError'>
-()
-HTTP Error 503: Service Unavailable
-<class 'urllib2.HTTPError'>
-()
-
-# Requests
