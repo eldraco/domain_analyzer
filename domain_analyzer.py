@@ -1910,7 +1910,7 @@ def printout(domain,ip,option):
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tCountry: {0}\n'.format(dicts.get('IpCountry')))
                     if dicts.__contains__('HostUp'):
-                        logging.info('\t\t\tIs Active: {0}'.format(dicts.get('HostUp')))
+                        logging.warning('\t\t\tIs Active: {0}'.format(dicts.get('HostUp')))
                         if output_file!="":
                             output_file_handler.writelines('\t\t\tIs Active: {0}\n'.format(dicts.get('HostUp')))
                     if dicts.__contains__('PortInfo'):
@@ -1971,7 +1971,7 @@ def printout(domain,ip,option):
                     if dicts.__contains__('IpCountry'):
                         country=dicts.get('IpCountry')
 
-                logging.info('\t\tIP: {0} ({1})'.format(ip,country))
+                logging.debug('\t\tIP: {0} ({1})'.format(ip,country))
                 if output_file!="":
                     output_file_handler.writelines('\t\tIP: {0} ({1})\n'.format(ip,country))
             # Things that are multiple times per IP
