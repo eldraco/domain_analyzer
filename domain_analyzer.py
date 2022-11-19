@@ -403,6 +403,7 @@ def get_NS_records(domain):
                         logging.debug('\t\t> Country: {0}'.format(country))
 
 
+
                     # Obtain Ip's reverse DNS name if we don't have it
                     has_ptr=False
                     for dicts in ip_registry:
@@ -804,9 +805,7 @@ def dns_request(domain):
                         nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
                         nmap_result_raw = nmap_result_pipes[0]
                         nmap_result_raw_stderr = nmap_result_pipes[1]
-                        if not nmap_result_raw_stderr:
-                            print('\t\tNmap seems to need root for better results')
-                        elif b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                        if b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
                             print('\t\tNmap seems to need root for better results')
                             #print(f'\t\t{nmap_result_raw_stderr}')
                         nmap_result = nmap_result_raw.split('\n')
@@ -1627,9 +1626,7 @@ def check_active_host():
                 nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
                 nmap_result_raw = nmap_result_pipes[0]
                 nmap_result_raw_stderr = nmap_result_pipes[1]
-                if not nmap_result_raw_stderr:
-                    print('\t\tNmap seems to need root for better results')
-                elif b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                if b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
                     print('\tNmap seems to need root for better results')
                     #print(f'\t\t{nmap_result_raw_stderr}')
 
@@ -1725,9 +1722,7 @@ def host_info(domain):
                             nmap_result_pipes =Popen(nmap_command, stdout=PIPE, stderr=PIPE).communicate()
                             nmap_result_raw = nmap_result_pipes[0]
                             nmap_result_raw_stderr = nmap_result_pipes[1]
-                            if not nmap_result_raw_stderr:
-                                print('\t\tNmap seems to need root for better results')
-                            elif b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
+                            if b'You requested a scan type which requires root privileges.' in nmap_result_raw_stderr:
                                 print('\t\tNmap seems to need root for better results')
                                 #print(f'\t\t{nmap_result_raw_stderr}')
 
