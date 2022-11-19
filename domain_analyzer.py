@@ -1097,7 +1097,6 @@ def check_A_records(domain,text=""):
     global subdomains_found
     global not_subdomains
     global common_hostnames
-    global geoip_cache
     global output_file_handler
     global countrys
 
@@ -1230,11 +1229,10 @@ def check_A_records(domain,text=""):
                             # We don't have this country
                             if debug:
                                 logging.debug('\t\t> No country yet')
-                            country=geoip_cache.country_name_by_addr(ip.to_text())
+                            country=geolite2.lookup(ip.to_text()).country
                             ipcountry['IpCountry']=country
                             ip_registry.append(ipcountry)
-                            if debug:
-                                logging.debug('\t\t> Country: {0}'.format(country))
+                            logging.info('\t\t> Country: {0}'.format(country))
 
                         # Here we store the hostname in a dictionary. The index is 'HostName'
                         hostname['HostName']=common_host+'.'+domain
@@ -2548,7 +2546,6 @@ def main():
         global max_amount_to_crawl
         global world_domination
         global countrys
-        global geoip_cache
         global colors
         global check_spf
         global amount_of_random_domains
