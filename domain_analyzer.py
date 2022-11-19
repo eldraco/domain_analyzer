@@ -133,7 +133,7 @@ from geoip import geolite2
 
 # Debug
 debug = 0
-vernum = "0.8.2"
+vernum = "0.8.3"
 
 # domain_data{'IpsInfo'}
 #    {
@@ -397,10 +397,14 @@ def get_NS_records(domain):
                         if debug:
                             logging.debug('\t\t> No country yet')
                         ipcountry={}
-                        country=geolite2.lookup(ip.to_text()).country
+                        try:
+                            country=geolite2.lookup(ip.to_text()).country
+                        except AttributeError:
+                            country='Not found'
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
                         logging.debug('\t\t> Country: {0}'.format(country))
+                        ipcountry['IpCountry']=country
 
 
 
@@ -433,9 +437,13 @@ def get_NS_records(domain):
 
                     # Do we have the country of this ip?
                     if countrys:
-                        country=geolite2.lookup(ip.to_text()).country
+                        try:
+                            country=geolite2.lookup(ip.to_text()).country
+                        except AttributeError:
+                            country='Not found'
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
+                        ipcountry['IpCountry']=country
 
                     # Here we store the hostname in a dictionary. The index is 'HostName'
                     hostname['HostName']=rdata.to_text()[:-1]
@@ -539,10 +547,13 @@ def get_MX_records(domain):
                         if debug:
                             logging.debug('\t\t> No country yet')
                         ipcountry={}
-                        country=geolite2.lookup(ip.to_text()).country
+                        try:
+                            country=geolite2.lookup(ip.to_text()).country
+                        except AttributeError:
+                            country='Not Found'
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
-                        logging.info('\t\t> Country: {0}'.format(country))
+                        logging.debug('\t\t> Country: {0}'.format(country))
 
                     # Obtain Ip's reverse DNS name if we don't have it
                     has_ptr=False
@@ -573,11 +584,14 @@ def get_MX_records(domain):
 
                     if countrys:
                         # Do we have the country of this ip?
-                        country=geolite2.lookup(ip.to_text()).country
+                        try:
+                            country=geolite2.lookup(ip.to_text()).country
+                        except AttributeError:
+                            country='Not Found'
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
                         if debug:
-                            logging.info('\t\t> Country: {0}'.format(country))
+                            logging.debug('\t\t> Country: {0}'.format(country))
 
                     # Here we store the hostname in a dictionary. The index is 'HostName'
                     hostname['HostName']=rdata.exchange.to_text()[:-1]
@@ -850,10 +864,13 @@ def dns_request(domain):
                                         if debug:
                                             logging.debug('\t\t> No country yet')
                                         ipcountry={}
-                                        country=geolite2.lookup(ip.to_text()).country
+                                        try:
+                                            country=geolite2.lookup(ip.to_text()).country
+                                        except AttributeError:
+                                            country='Not Found'
                                         ipcountry['IpCountry']=country
                                         ip_registry.append(ipcountry)
-                                        logging.info('\t\t> Country: {0}'.format(country))
+                                        logging.debug('\t\t> Country: {0}'.format(country))
 
                                     # Obtain Ip's reverse DNS name if we don't have it
                                     has_ptr=False
@@ -887,7 +904,10 @@ def dns_request(domain):
 
                                     if countrys:
                                         # Do we have the country of this ip?
-                                        country=geolite2.lookup(ip).country
+                                        try:
+                                            country=geolite2.lookup(ip).country
+                                        except AttributeError:
+                                            country='Not Found'
                                         ipcountry['IpCountry']=country
                                         ip_registry.append(ipcountry)
 
@@ -1234,10 +1254,14 @@ def check_A_records(domain,text=""):
                             # We don't have this country
                             if debug:
                                 logging.debug('\t\t> No country yet')
-                            country=geolite2.lookup(ip.to_text()).country
+                            try:
+                                country=geolite2.lookup(ip.to_text()).country
+                            except AttributeError:
+                                country='Not Found'
+
                             ipcountry['IpCountry']=country
                             ip_registry.append(ipcountry)
-                            logging.info('\t\t> Country: {0}'.format(country))
+                            logging.debug('\t\t> Country: {0}'.format(country))
 
                         # Here we store the hostname in a dictionary. The index is 'HostName'
                         hostname['HostName']=common_host+'.'+domain
@@ -1273,7 +1297,10 @@ def check_A_records(domain,text=""):
 
                     if countrys:
                         # Search the country of the IP
-                        country=geolite2.lookup(ip.to_text()).country
+                        try:
+                            country=geolite2.lookup(ip.to_text()).country
+                        except AttributeError:
+                            country='Not Found'
                         ipcountry['IpCountry']=country
                         ip_registry.append(ipcountry)
 
